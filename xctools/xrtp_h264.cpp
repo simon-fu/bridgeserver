@@ -7,7 +7,7 @@
 
 #include "xcutil.h"
 #include "xrtp_h264.h"
-#define LOG_PLAY(...)
+// #define LOG_PLAY(...)
 #define dbgd(...) //do{printf(__VA_ARGS__); printf("\n");}while(0)
 #define dbgi(...) do{printf(__VA_ARGS__); printf("\n");}while(0)
 
@@ -481,7 +481,7 @@ uint32_t rebase_timestamp(xtimestamp64 * tswrapper, int64_t &src_first_timestamp
 	int64_t timestamp64 = xtimestamp64_unwrap(tswrapper, timestamp);
 	if(src_first_timestamp < 0){
 		src_first_timestamp = timestamp64;
-		dbgi("first timestamp %lld", src_first_timestamp);
+		// dbgi("first timestamp %lld", src_first_timestamp);
 	}
 	timestamp = (uint32_t)(timestamp64 - src_first_timestamp);
 	be_set_u32(timestamp, rtp+4);

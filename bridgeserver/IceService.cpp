@@ -313,7 +313,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 				LOG_INFO("fail to get webrtc answer.");
 				break;
 			}
-	#pragma  message("how about IPV6")
+	// TODO: #pragma  message("how about IPV6")
 			// get webrtc peer address from conference_control_server
 			sockaddr_in webrtcAddr;			
 			webrtcAddr.sin_family = AF_INET;
