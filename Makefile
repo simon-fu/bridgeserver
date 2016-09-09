@@ -47,7 +47,7 @@ BRIDGE_BIN_PATH:=$(BINDIR)/bridge
 export _CFLAGS 	:= $(CC_CFLAGS) $(OS_CFLAGS) $(HOST_CFLAGS) $(M_CFLAGS) \
 		   $(CFLAGS) $(CC_INC)../include
 export _CXXFLAGS:= $(_CFLAGS) $(CC_CXXFLAGS) $(OS_CXXFLAGS) $(M_CXXFLAGS) \
-		   $(HOST_CXXFLAGS) $(CXXFLAGS)
+		   $(HOST_CXXFLAGS) $(CXXFLAGS) -std=c++11
 export _LDFLAGS := $(CC_LDFLAGS) $(OS_LDFLAGS) $(M_LDFLAGS) $(HOST_LDFLAGS) \
 		   $(APP_LDFLAGS) $(LDFLAGS) 
 
@@ -55,15 +55,21 @@ export _LDFLAGS := $(CC_LDFLAGS) $(OS_LDFLAGS) $(M_LDFLAGS) $(HOST_LDFLAGS) \
 ###############################################################################
 # Defines for building library
 #
-		   
-SRC_DIRS = third/eice/src/
+
+XC_DIR=./xctools
+# XC_DIR=/mnt/hgfs/simon/projects/easemob/src/xmedia/xctools/src
+CPP_SRC += $(XC_DIR)/xcutil.cpp $(XC_DIR)/xrtp_h264.cpp  $(XC_DIR)/xtrans_codec.cpp
+
+SRC_DIRS = third/eice/src/ 
 HEAD_DIRS = $(SRC_DIRS)
+HEAD_DIRS += $(XC_DIR)/
+HEAD_DIRS += /usr/local/include
 
 #functions
 get_files =$(foreach dir,$(subst $(DIR_DIVIDER),$(MK_DIR_DIVIDER),$(1)),$(wildcard $(dir)$(MK_DIR_DIVIDER)$(2)))
 
-C_SRC = $(call get_files,$(SRC_DIRS),*.c)
-CPP_SRC = $(call get_files,$(SRC_DIRS),*.cpp)
+C_SRC += $(call get_files,$(SRC_DIRS),*.c)
+CPP_SRC += $(call get_files,$(SRC_DIRS),*.cpp)
 INCLUDE_DIRS = $(addprefix -I,$(HEAD_DIRS)) 
 
 

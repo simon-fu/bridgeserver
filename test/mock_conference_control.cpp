@@ -176,7 +176,8 @@ public:
 			}*/
 			{
 				std::ofstream output;
-				output.open("/home/shangrong/iceAddr.json", ios::out | ios::trunc);
+				//output.open("/home/shangrong/iceAddr.json", ios::out | ios::trunc);
+				output.open("./iceAddr.json", ios::out | ios::trunc);
 				if (output.good()) {
 					output << command.content;
 				}
@@ -191,7 +192,8 @@ public:
 			{
 				try
 				{				
-					INI::Parser parser("/home/shangrong/answer.ini");
+					// INI::Parser parser("/home/shangrong/answer.ini");
+					INI::Parser parser("./answer.ini");
 					std::string answer = parser.top()["webrtc_answer"];
 					if (answer.empty()) {
 						usleep(1000000);

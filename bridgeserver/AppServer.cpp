@@ -33,21 +33,23 @@ void log_eice(int level, const char *data, int len)
 	
 	assert(data != NULL);
 	
-	switch (level)
-	{
-	case 1:
-		LOG_ERROR(data);
-		break;
-	case 2:
-		LOG_WARN(data);
-		break;
-	case 3:
-		LOG_DEBUG(data);
-		break;
-	default:
-		LOG_DEBUG(data);
-		break;
-	}	
+	LOG_INFO(data);
+
+	// switch (level)
+	// {
+	// case 1:
+	// 	LOG_ERROR(data);
+	// 	break;
+	// case 2:
+	// 	LOG_WARN(data);
+	// 	break;
+	// case 3:
+	// 	LOG_DEBUG(data);
+	// 	break;
+	// default:
+	// 	LOG_DEBUG(data);
+	// 	break;
+	// }	
 }
 
 void AppServer::ev_signal_cb(evutil_socket_t sig, short events, void *user_data)

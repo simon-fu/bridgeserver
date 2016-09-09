@@ -11,6 +11,7 @@
 
 #include "IceService.h"
 #include "MediaFilter.h"
+#include "xrtp_h264.h"
 
 static const int FORWARD_ALIVE_CHECK_TIME = 10 * 60;	/**10 minute.*/
 static const int MAX_UDP_PACKET_LEN = 10 * 1024;
@@ -61,15 +62,25 @@ public:
 		VideoResendService	xmppVideoResend;	/** xmpp客户端有丢包重发的请求处理 */
 		AudioRtpFilter		audioFilter;
 
+	xrtp_h264_repacker video_repacker_;
+	xrtp_transformer audio_transformer_;
+	unsigned char * nalu_buf_;
+	int nalu_buf_size_;
+
+	int64_t start_time_base_;
+	int exist_timestamp_;
+	int force_build_timestamp;
+
+
 		bool isWebrtcAddr(const struct sockaddr_in& tempadd);
 
-		Forward() : lastPackageTime(time(NULL)) {}
+		Forward() ;
 		~Forward();
 	};
 	typedef std::map<Address, Forward> ForwardMap;
 			
 	ForwardService();
-	~ForwardService() {}
+	virtual ~ForwardService() ;
 
 	void startForward(MEDIA_TYPE media, AddrPair& addr_pairs, const sockaddr_in& webrtcAddr);
 		
@@ -87,5 +98,8 @@ private:
 	struct event	timer_;		
 		
 	ForwardMap		forwards_;
+
+
+
 };
 
