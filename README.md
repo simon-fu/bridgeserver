@@ -10,6 +10,7 @@ bridge for rtp session
 	sudo apt-get install libcppunit-dev liblog4cplus-dev libevent-dev
 	
 ### build main
+	cd lib && ln -s ubuntu/libeice-full.a && cd ..
 	./build.sh
 	
 ### build eice library

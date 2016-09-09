@@ -39,7 +39,7 @@ COMMON_OBJ += $(foreach src, $(COMMON_CPP_SRC), $(addsuffix .o, $(basename $(src
 
 TEST_SRC_DIRS += $(MKFILE_DIR)/test/ 
 TEST_CPP_SRC += $(call get_files,$(TEST_SRC_DIRS),*.cpp)
-TEST_OBJ += $(foreach src, $(TEST_CPP_SRC), $(addsuffix .o, $(basename $(src))))
+TEST_OBJS += $(foreach src, $(TEST_CPP_SRC), $(addsuffix .o, $(basename $(src))))
 ALL_CPP_SRC += $(TEST_CPP_SRC)
 
 
@@ -56,6 +56,18 @@ TARGET_BRIDGE:=$(OUTPUT_DIR)/bridge
 TARGETS += $(TARGET_BRIDGE)
 BRIDGE_OBJ = $(MKFILE_DIR)/bridgeserver/main.o 
 ALL_CC_OBJ += $(BRIDGE_OBJ)
+
+TARGET_BRIDGE_TEST:=$(OUTPUT_DIR)/test.bin
+TARGETS += $(TARGET_BRIDGE_TEST)
+BRIDGE_TEST_OBJ = $(MKFILE_DIR)/test/test_main.o 
+ALL_CC_OBJ += $(BRIDGE_TEST_OBJ)
+
+TARGET_CCS:=$(OUTPUT_DIR)/ccs
+TARGETS += $(TARGET_CCS)
+CCS_OBJ = $(MKFILE_DIR)/test/ccs_main.o 
+ALL_CC_OBJ += $(CCS_OBJ)
+
+
 
 
 MY_FLAGS= -g
@@ -113,7 +125,7 @@ MY_LD_FLAGS += -lpthread
 MY_LD_FLAGS += -lcrypto
 
 MY_LD_FLAGS += -leice-full
-MY_LD_FLAGS += -pthread  -llog4cplus -lrt 
+MY_LD_FLAGS += -pthread  -llog4cplus -lcppunit -lrt 
 
 MY_LD_FLAGS += -g -fno-pie
 
@@ -143,18 +155,12 @@ all: $(TARGETS)
 $(TARGET_BRIDGE): $(BRIDGE_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
 	$(CC)  $(BRIDGE_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 	
+$(TARGET_BRIDGE_TEST): $(BRIDGE_TEST_OBJ) $(TEST_OBJS) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+	$(CC)  $(BRIDGE_TEST_OBJ) $(TEST_OBJS) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 
-# $(TARGET_UDP_REPLAY): $(UDP_REPLAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
-# 	$(CC)  $(UDP_REPLAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
+$(TARGET_CCS): $(CCS_OBJ) $(TEST_OBJS) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+	$(CC)  $(CCS_OBJ) $(TEST_OBJS) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 
-# $(TARGET_CONVERT_DUMP_H264): $(CONVERT_DUMP_H264_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
-# 	$(CC)  $(CONVERT_DUMP_H264_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
-
-# $(TARGET_RTP_RELAY): $(RTP_RELAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
-# 	$(CC)  $(RTP_RELAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
-
-# $(TARGET_RTP_REPLAY): $(RTP_REPLAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
-# 	$(CC)  $(RTP_REPLAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 
 $(OUTPUT_DIR):
 	mkdir -p $@
