@@ -1,155 +1,195 @@
 
-PJ_DIR_ := ..
-ifdef PJ_DIR	
-	PJ_DIR_ := $(PJ_DIR)
-endif
-
-include $(PJ_DIR_)/build.mak
-include $(PJ_DIR_)/version.mak
-include $(PJDIR)/build/common.mak
-
-export LIBDIR := ./lib
-export BINDIR := ./bin
-
-RULES_MAK := $(PJDIR)/build/rules.mak
-
-export TARGET_LIB := libeice-$(TARGET_NAME)$(LIBEXT)
-
-PJLIB_LIB:=libpj-$(TARGET_NAME)$(LIBEXT)
-PJLIB_UTIL_LIB:=libpjlib-util-$(TARGET_NAME)$(LIBEXT)
-PJNATH_LIB:=libpjnath-$(TARGET_NAME)$(LIBEXT)
-
-PJLIB_LIB_PATH:=$(PJDIR)/pjlib/lib/$(PJLIB_LIB)
-PJLIB_UTIL_LIB_PATH:=$(PJDIR)/pjlib-util/lib/$(PJLIB_UTIL_LIB)
-PJNATH_LIB_PATH:=$(PJDIR)/pjnath/lib/$(PJNATH_LIB)
+# MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+MKFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+TARGET_PLATFORM=$(shell uname)
 
 
 
-ifeq ($(EICE_SHARED_LIBRARIES),)
-else
-TARGET_SONAME = libeice.$(SHLIB_SUFFIX)
-export EICE_SONAME := libeice.$(SHLIB_SUFFIX)
-export EICE_SHLIB := $(TARGET_SONAME).$(PJ_VERSION_MAJOR)
-endif
-
-MERG_LIBS:=$(PJLIB_LIB_PATH) $(PJLIB_UTIL_LIB_PATH) $(PJNATH_LIB_PATH) $(LIBDIR)/$(TARGET_LIB)
-ARSCRIPT:=_tmp.ar
-ARSCRIPT_PATH:=$(LIBDIR)/$(ARSCRIPT)
-FULL_LIB_PATH:=$(LIBDIR)/libeice_.a
-
-TEST_BIN_PATH:=$(BINDIR)/test.bin
-CCS_BIN_PATH:=$(BINDIR)/ccs
-BRIDGE_BIN_PATH:=$(BINDIR)/bridge
-
-###############################################################################
-# Gather all flags.
-#
-export _CFLAGS 	:= $(CC_CFLAGS) $(OS_CFLAGS) $(HOST_CFLAGS) $(M_CFLAGS) \
-		   $(CFLAGS) $(CC_INC)../include
-export _CXXFLAGS:= $(_CFLAGS) $(CC_CXXFLAGS) $(OS_CXXFLAGS) $(M_CXXFLAGS) \
-		   $(HOST_CXXFLAGS) $(CXXFLAGS) -std=c++11
-export _LDFLAGS := $(CC_LDFLAGS) $(OS_LDFLAGS) $(M_LDFLAGS) $(HOST_LDFLAGS) \
-		   $(APP_LDFLAGS) $(LDFLAGS) 
-
-
-###############################################################################
-# Defines for building library
-#
-
-XC_DIR=./xctools
-# XC_DIR=/mnt/hgfs/simon/projects/easemob/src/xmedia/xctools/src
-CPP_SRC += $(XC_DIR)/xcutil.cpp $(XC_DIR)/xrtp_h264.cpp  $(XC_DIR)/xtrans_codec.cpp
-
-SRC_DIRS = third/eice/src/ 
-HEAD_DIRS = $(SRC_DIRS)
-HEAD_DIRS += $(XC_DIR)/
-HEAD_DIRS += /usr/local/include
+SRC_ROOT=$(MKFILE_DIR)
+OUTPUT_DIR=$(MKFILE_DIR)/bin
+LIB_PATHS += -L$(MKFILE_DIR)/lib
+HEAD_DIRS += $(MKFILE_DIR)/third/eice/src/
 
 #functions
 get_files =$(foreach dir,$(subst $(DIR_DIVIDER),$(MK_DIR_DIVIDER),$(1)),$(wildcard $(dir)$(MK_DIR_DIVIDER)$(2)))
 
-C_SRC += $(call get_files,$(SRC_DIRS),*.c)
-CPP_SRC += $(call get_files,$(SRC_DIRS),*.cpp)
-INCLUDE_DIRS = $(addprefix -I,$(HEAD_DIRS)) 
+
+# SRC_DIRS += $(MKFILE_DIR)/bridgeserver/ $(MKFILE_DIR)/xctools/
+# C_SRC += $(call get_files,$(SRC_DIRS),*.c)
+# CPP_SRC += $(call get_files,$(SRC_DIRS),*.cpp)
+# ALL_C_SRC += $(C_SRC)
+# ALL_CPP_SRC += $(CPP_SRC)
+# HEAD_DIRS += $(SRC_DIRS)
 
 
-C_OBJ = $(foreach src, $(C_SRC), $(addsuffix .o, $(basename $(src))))
-CPP_OBJ = $(foreach cpp, $(CPP_SRC), $(addsuffix .o, $(basename $(cpp))))
+COMMON_SRC_DIRS += $(MKFILE_DIR)/bridgeserver/ $(MKFILE_DIR)/xctools/
+COMMON_C_SRC += $(call get_files,$(COMMON_SRC_DIRS),*.c)
+COMMON_CPP_SRC += $(call get_files,$(COMMON_SRC_DIRS),*.cpp)
+ALL_C_SRC += $(COMMON_C_SRC)
+ALL_CPP_SRC += $(COMMON_CPP_SRC)
+HEAD_DIRS += $(COMMON_SRC_DIRS)
+COMMON_OBJ += $(foreach src, $(COMMON_CPP_SRC), $(addsuffix .o, $(basename $(src))))
 
-###############################################################################
-# Main entry
-#
-#
-all: $(LIBDIR)/$(TARGET_LIB) $(FULL_LIB_PATH) $(TEST_BIN_PATH) $(CCS_BIN_PATH) $(BRIDGE_BIN_PATH)
-.PHONY:all 
 
-$(C_OBJ):%.o:%.c
-	$(CC) -c -Ddebug $(_CFLAGS) $(APP_CFLAGS) $(INCLUDE_DIRS)  $< -o $@
+# COMMON_CPP_SRC += src/xcutil.cpp src/xrtp_h264.cpp  src/xtrans_codec.cpp
+# # COMMON_H += src/xcutil.h src/xrtp_defs.h src/xrtp_h264.h src/xtrans_codec.h
+# COMMON_OBJ += $(foreach src, $(COMMON_CPP_SRC), $(addsuffix .o, $(basename $(src))))
+# ALL_CPP_SRC += $(COMMON_CPP_SRC)
 
-$(CPP_OBJ):%.o:%.cpp
-	$(CXX) -c $(_CXXFLAGS) $(APP_CFLAGS) $(INCLUDE_DIRS) $< -o $@
-$(LIBDIR)/$(TARGET_LIB): $(C_OBJ) $(CPP_OBJ)
-	mkdir -p $(LIBDIR)
-#	$(CC) $(C_OBJ) $(CPP_OBJ) $(_LDFLAGS) -o $@
-	$(AR) rv $@ $(C_OBJ) $(CPP_OBJ) 
-	@echo make success
 
-$(FULL_LIB_PATH): $(MERG_LIBS)
-	$(SILENT)echo "CREATE $@" > $(ARSCRIPT_PATH)
-	$(SILENT)for a in $(MERG_LIBS); do (echo "ADDLIB $$a" >> $(ARSCRIPT_PATH)); done
-#	$(SILENT)echo "ADDMOD $(OBJECTS)" >> $(ARSCRIPT_PATH)
-	$(SILENT)echo "SAVE" >> $(ARSCRIPT_PATH)
-	$(SILENT)echo "END" >> $(ARSCRIPT_PATH)
-	$(SILENT)$(AR) -M < $(ARSCRIPT_PATH)
-	$(RM) $(ARSCRIPT_PATH)
+TEST_SRC_DIRS += $(MKFILE_DIR)/test/ 
+TEST_CPP_SRC += $(call get_files,$(TEST_SRC_DIRS),*.cpp)
+TEST_OBJ += $(foreach src, $(TEST_CPP_SRC), $(addsuffix .o, $(basename $(src))))
+ALL_CPP_SRC += $(TEST_CPP_SRC)
+
+
+HEAD_DIRS += /usr/local/include/
+INCLUDE_DIRS += $(addprefix -I,$(HEAD_DIRS))
+
+
+
+TARGET_TEST:=$(OUTPUT_DIR)/test.bin
+TARGET_ccs:=$(OUTPUT_DIR)/ccs
+
+
+TARGET_BRIDGE:=$(OUTPUT_DIR)/bridge
+TARGETS += $(TARGET_BRIDGE)
+BRIDGE_OBJ = $(MKFILE_DIR)/bridgeserver/main.o 
+ALL_CC_OBJ += $(BRIDGE_OBJ)
+
+
+MY_FLAGS= -g
+# for MacOS
+MY_FLAGS += -fno-pie 
+
+
+#CC=gcc
+CC=g++
+
+MV = mv
+RM = rm -fr
+STRIP = strip
+
+
+ALL_C_OBJ += $(foreach src, $(ALL_C_SRC), $(addsuffix .o, $(basename $(src))))
+ALL_CPP_OBJ += $(foreach cpp, $(ALL_CPP_SRC), $(addsuffix .o, $(basename $(cpp))))
+
+
+# -fno-strict-aliasing remove the warning "dereferencing type-punned pointer will break strict-aliasing rules "
+# 
+
+ifeq '$(STRESS_TEST)' ''
+STRESS_TEST=0
+endif
+
+
+
+ifneq '$(TARGET_PLATFORM)' 'Darwin'
+#MY_FLAGS+= -std=c++11
+LIB_PATHS += -L/usr/lib64 
+else
+#MY_FLAGS+= -std=c++0x
+#MY_FLAGS+= -Wc++11-extensions
+endif
+
+#CFLAGS = -fPIC -fno-strict-aliasing  -Wall -O2 $(INCLUDE_DIRS) 
+CFLAGS= $(INCLUDE_DIRS) $(MACROS)  $(MY_FLAGS) 
+#CFLAGS += -fstack-protector 
+#CFLAGS += -std=c++11
+#CFLAGS += -std=c++0x
+
+
+CPPFLAGS=$(INCLUDE_DIRS) $(MACROS)  $(MY_FLAGS) -std=c++11
+
+
+
+LIB_PATHS+= -L/usr/local/lib 
+MY_LD_FLAGS = $(LIB_PATHS)
+MY_LD_FLAGS += -lstdc++ 
+MY_LD_FLAGS += -lm
+# MY_LD_FLAGS += -lboost_system
+# MY_LD_FLAGS += -lhiredis
+MY_LD_FLAGS += -lpthread
+MY_LD_FLAGS += -lcrypto
+
+MY_LD_FLAGS += -leice-full
+MY_LD_FLAGS += -pthread  -llog4cplus -lrt 
+
+MY_LD_FLAGS += -g -fno-pie
+
+
+CFLAGS += $(shell "pkg-config libevent --cflags")
+CPPFLAGS += $(shell pkg-config libevent --cflags)
+MY_LD_FLAGS += $(shell pkg-config libevent --libs)
+
+CFLAGS += $(shell "pkg-config uuid --cflags")
+CPPFLAGS += $(shell pkg-config uuid --cflags)
+MY_LD_FLAGS += $(shell pkg-config uuid --libs)
+
+# CFLAGS += $(shell "pkg-config speex --cflags")
+# CPPFLAGS += $(shell pkg-config speex --cflags)
+# MY_LD_FLAGS += $(shell pkg-config speex --libs)
+
+# CFLAGS += $(shell "pkg-config opus --cflags")
+# CPPFLAGS += $(shell pkg-config opus --cflags)
+# MY_LD_FLAGS += $(shell pkg-config opus --libs)
+
+
+
+all: $(TARGETS)
+	@echo build success
+
+
+$(TARGET_BRIDGE): $(BRIDGE_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+	$(CC)  $(BRIDGE_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 	
 
-BRIDGESERVER_SRCS := $(wildcard ./bridgeserver/*.cpp)
-BRIDGESERVER_OBJS = $(foreach cpp, $(BRIDGESERVER_SRCS), $(addsuffix .o, $(basename $(cpp))))
-$(BRIDGESERVER_OBJS):%.o:%.cpp
-	$(CXX) -c -g -Ddebug -std=c++11  $(_CXXFLAGS) $(APP_CFLAGS) $(INCLUDE_DIRS) $< -o $@
-$(BRIDGE_BIN_PATH): $(BRIDGESERVER_OBJS) ./bridgeserver/main.cc
-	mkdir -p $(BINDIR)
-	$(APP_CXX) $^ -std=c++11  -L$(LIBDIR) -pthread  -lpthread -llog4cplus -levent -lrt -leice_ -luuid -o $@
+# $(TARGET_UDP_REPLAY): $(UDP_REPLAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+# 	$(CC)  $(UDP_REPLAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 
+# $(TARGET_CONVERT_DUMP_H264): $(CONVERT_DUMP_H264_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+# 	$(CC)  $(CONVERT_DUMP_H264_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
 
-TEST_SRCS := $(wildcard ./test/*.cpp) 
-TEST_OBJS = $(foreach cpp, $(TEST_SRCS), $(addsuffix .o, $(basename $(cpp))))
-$(TEST_OBJS):%.o:%.cpp	
-	$(CXX) -c -g -Ddebug -std=c++11  $(_CXXFLAGS) $(APP_CFLAGS) $(INCLUDE_DIRS)  $< -o $@
-$(TEST_BIN_PATH): $(TEST_OBJS) $(BRIDGESERVER_OBJS)
-	mkdir -p $(BINDIR)
-	$(APP_CXX)  $^ -g -Ddebug  -std=c++11  -L$(LIBDIR) -pthread  -lpthread -lcppunit -llog4cplus -levent -lrt -leice_  -luuid -o $@
+# $(TARGET_RTP_RELAY): $(RTP_RELAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+# 	$(CC)  $(RTP_RELAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
+
+# $(TARGET_RTP_REPLAY): $(RTP_REPLAY_OBJ) $(COMMON_OBJ) $(COMMON_H) $(OUTPUT_DIR) 
+# 	$(CC)  $(RTP_REPLAY_OBJ) $(COMMON_OBJ) $(MY_LD_FLAGS) -o $@
+
+$(OUTPUT_DIR):
+	mkdir -p $@
 
 
 
-CCS_OBJ = ./test/mock_conference_control_main.o
-$(CCS_OBJ):./test/mock_conference_control.cpp
-	$(CXX) -c -g -Ddebug -DMAIN -std=c++11  $(_CXXFLAGS) $(APP_CFLAGS) $(INCLUDE_DIRS)  $< -o $@
-$(CCS_BIN_PATH): $(CCS_OBJ) $(BRIDGESERVER_OBJS) 
-	mkdir -p $(BINDIR)
-	$(APP_CXX)  $^ -g -Ddebug -std=c++11  $(INCLUDE_DIRS) -L$(LIBDIR) -pthread  -lpthread -lcppunit -llog4cplus -levent -lrt -leice_  -luuid -o $@
+bd:$(C_OBJ)
+	echo $<
 
+$(ALL_C_OBJ):%.o:%.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(ALL_CPP_OBJ):%.o:%.cpp
+	$(CC) -c $(CPPFLAGS) $< -o $@
+
+$(ALL_CC_OBJ):%.o:%.cc
+	$(CC) -c $(CPPFLAGS) $< -o $@
 
 	
 .PHONY: clean print_info
-clean:		
-	$(RM) $(C_OBJ)
-	$(RM) $(CPP_OBJ)
-	$(RM) $(TEST_OBJS)
-	$(RM) $(CCS_OBJS)
-	$(RM) $(BRIDGESERVER_OBJS)
-	$(RM) $(BRIDGE_BIN_PATH)	
-	$(RM) $(TEST_BIN_PATH)
+clean:
+	$(RM) $(TARGETS)
+	$(RM) $(ALL_C_OBJ)
+	$(RM) $(ALL_CPP_OBJ)
+	$(RM) $(ALL_CC_OBJ)
+#	$(RM) ./bin/mserver.dSYM
 
 print:
 	@echo TARGET_PLATFORM=$(TARGET_PLATFORM)
 	@echo ----------------------
 	@echo CC=$(CC)
 	@echo ----------------------
-	@echo CFLAGS=$(_CFLAGS)
+	@echo CFLAGS=$(CFLAGS)
 	@echo ----------------------
-	@echo CPPFLAGS=$(_CXXFLAGS)
+	@echo CPPFLAGS=$(CPPFLAGS)
 	@echo ----------------------
 	@echo C_SRC=$(C_SRC)
 	@echo ----------------------
@@ -158,7 +198,10 @@ print:
 	@echo C_OBJ=$(C_OBJ)
 	@echo ----------------------
 	@echo CPP_OBJ=$(CPP_OBJ)
-	
+	@echo ----------------------
+	@echo ALL_C_SRC=[$(ALL_C_SRC)]
+	@echo ----------------------
+	@echo ALL_CPP_SRC=[$(ALL_CPP_SRC)]
 
 
 
