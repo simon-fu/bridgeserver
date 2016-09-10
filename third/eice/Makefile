@@ -1,7 +1,7 @@
 
 # MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
+TARGET_PLATFORM=$(shell uname)
 
 PJ_DIR_ := ..
 LIBDIR := $(MKFILE_DIR)/lib
@@ -81,6 +81,14 @@ INCLUDE_DIRS = $(addprefix -I,$(HEAD_DIRS))
 C_OBJ = $(foreach src, $(C_SRC), $(addsuffix .o, $(basename $(src))))
 CPP_OBJ = $(foreach cpp, $(CPP_SRC), $(addsuffix .o, $(basename $(cpp))))
 
+
+ifeq '$(TARGET_PLATFORM)' 'Darwin'
+LIB_TOOL_CMD :=libtool -static -o
+else
+LIB_TOOL_CMD :=$(MKFILE_DIR)/merge_static_lib.sh mergelinux $(ARSCRIPT_PATH) 
+endif
+
+
 ###############################################################################
 # Main entry
 #
@@ -102,14 +110,15 @@ $(LIBDIR)/$(TARGET_LIB): $(C_OBJ) $(CPP_OBJ)
 	@echo make success
 
 $(FULL_LIB_PATH): $(MERG_LIBS)
-	$(SILENT)echo "CREATE $@" > $(ARSCRIPT_PATH)
-	$(SILENT)for a in $(MERG_LIBS); do (echo "ADDLIB $$a" >> $(ARSCRIPT_PATH)); done
-#	$(SILENT)echo "ADDMOD $(OBJECTS)" >> $(ARSCRIPT_PATH)
-	$(SILENT)echo "SAVE" >> $(ARSCRIPT_PATH)
-	$(SILENT)echo "END" >> $(ARSCRIPT_PATH)
-	$(SILENT)$(AR) -M < $(ARSCRIPT_PATH)
-	$(RM) $(ARSCRIPT_PATH)
-	
+# 	$(SILENT)echo "CREATE $@" > $(ARSCRIPT_PATH)
+# 	$(SILENT)for a in $(MERG_LIBS); do (echo "ADDLIB $$a" >> $(ARSCRIPT_PATH)); done
+# #	$(SILENT)echo "ADDMOD $(OBJECTS)" >> $(ARSCRIPT_PATH)
+# 	$(SILENT)echo "SAVE" >> $(ARSCRIPT_PATH)
+# 	$(SILENT)echo "END" >> $(ARSCRIPT_PATH)
+# 	$(SILENT)$(AR) -M < $(ARSCRIPT_PATH)
+# 	$(RM) $(ARSCRIPT_PATH)
+	$(LIB_TOOL_CMD) $@ $^
+
 
 
 .PHONY: clean print_info

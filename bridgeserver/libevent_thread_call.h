@@ -90,14 +90,14 @@ public:
 		evutil_make_socket_nonblocking(wakeFd_[0]);
 		evutil_make_socket_nonblocking(wakeFd_[1]);
 
-		std::cout << "socket pair ret:" << iret << std::endl;
+		// std::cout << "socket pair ret:" << iret << std::endl;
 		iret = event_assign(&ev_, base, wakeFd_[1], EV_READ | EV_PERSIST, wakeupCallback, this);
 		if (0 != iret) {
-			std::cout << "event assign error" << iret << std::endl;
+			LOG_ERROR("event assign error" << iret);
 		}
 		iret = event_add(&ev_, NULL);
 		if (0 != iret) {
-			std::cout << "event add error" << iret << std::endl;
+			LOG_ERROR("event add error" << iret );
 		}
 	}
 

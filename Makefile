@@ -90,19 +90,7 @@ ALL_CPP_OBJ += $(foreach cpp, $(ALL_CPP_SRC), $(addsuffix .o, $(basename $(cpp))
 # -fno-strict-aliasing remove the warning "dereferencing type-punned pointer will break strict-aliasing rules "
 # 
 
-ifeq '$(STRESS_TEST)' ''
-STRESS_TEST=0
-endif
 
-
-
-ifneq '$(TARGET_PLATFORM)' 'Darwin'
-#MY_FLAGS+= -std=c++11
-LIB_PATHS += -L/usr/lib64 
-else
-#MY_FLAGS+= -std=c++0x
-#MY_FLAGS+= -Wc++11-extensions
-endif
 
 #CFLAGS = -fPIC -fno-strict-aliasing  -Wall -O2 $(INCLUDE_DIRS) 
 CFLAGS= $(INCLUDE_DIRS) $(MACROS)  $(MY_FLAGS) 
@@ -125,7 +113,10 @@ MY_LD_FLAGS += -lpthread
 MY_LD_FLAGS += -lcrypto
 
 MY_LD_FLAGS += -leice-full
-MY_LD_FLAGS += -pthread  -llog4cplus -lcppunit -lrt 
+MY_LD_FLAGS += -llog4cplus -lcppunit 
+
+# MY_LD_FLAGS += -pthread
+# MY_LD_FLAGS += -lrt 
 
 MY_LD_FLAGS += -g -fno-pie
 
@@ -134,9 +125,9 @@ CFLAGS += $(shell "pkg-config libevent --cflags")
 CPPFLAGS += $(shell pkg-config libevent --cflags)
 MY_LD_FLAGS += $(shell pkg-config libevent --libs)
 
-CFLAGS += $(shell "pkg-config uuid --cflags")
-CPPFLAGS += $(shell pkg-config uuid --cflags)
-MY_LD_FLAGS += $(shell pkg-config uuid --libs)
+# CFLAGS += $(shell "pkg-config uuid --cflags")
+# CPPFLAGS += $(shell pkg-config uuid --cflags)
+# MY_LD_FLAGS += $(shell pkg-config uuid --libs)
 
 # CFLAGS += $(shell "pkg-config speex --cflags")
 # CPPFLAGS += $(shell pkg-config speex --cflags)
@@ -146,6 +137,18 @@ MY_LD_FLAGS += $(shell pkg-config uuid --libs)
 # CPPFLAGS += $(shell pkg-config opus --cflags)
 # MY_LD_FLAGS += $(shell pkg-config opus --libs)
 
+ifneq '$(TARGET_PLATFORM)' 'Darwin'
+#MY_FLAGS+= -std=c++11
+LIB_PATHS += -L/usr/lib64 
+
+CFLAGS += $(shell "pkg-config uuid --cflags")
+CPPFLAGS += $(shell pkg-config uuid --cflags)
+MY_LD_FLAGS += $(shell pkg-config uuid --libs)
+else
+#MY_FLAGS+= -std=c++0x
+#MY_FLAGS+= -Wc++11-extensions
+
+endif
 
 
 all: $(TARGETS)

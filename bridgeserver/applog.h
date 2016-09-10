@@ -39,12 +39,21 @@
 #define LOG_TRACE(arg)  STDOUT << arg << std::endl;
 */
 
-#define LOG_FATAL(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, FATAL)
-#define LOG_ERROR(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, ERROR)
-#define LOG_WARN(arg)   LOG4CPLUS_MACRO_BODY(g_appLogger, arg, WARN)
-#define LOG_INFO(arg)   LOG4CPLUS_MACRO_BODY(g_appLogger, arg, INFO)
-#define LOG_DEBUG(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, DEBUG)
-#define LOG_TRACE(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, TRACE)
+// #define LOG_FATAL(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, FATAL)
+// #define LOG_ERROR(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, ERROR)
+// #define LOG_WARN(arg)   LOG4CPLUS_MACRO_BODY(g_appLogger, arg, WARN)
+// #define LOG_INFO(arg)   LOG4CPLUS_MACRO_BODY(g_appLogger, arg, INFO)
+// #define LOG_DEBUG(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, DEBUG)
+// #define LOG_TRACE(arg)  LOG4CPLUS_MACRO_BODY(g_appLogger, arg, TRACE)
+
+#define LOG_FATAL(arg)  LOG4CPLUS_TRACE(g_appLogger, arg)
+#define LOG_ERROR(arg)  LOG4CPLUS_TRACE(g_appLogger, arg)
+#define LOG_WARN(arg)   LOG4CPLUS_TRACE(g_appLogger, arg)
+#define LOG_INFO(arg)   LOG4CPLUS_TRACE(g_appLogger, arg)
+#define LOG_DEBUG(arg)  LOG4CPLUS_TRACE(g_appLogger, arg)
+#define LOG_TRACE(arg)  LOG4CPLUS_TRACE(g_appLogger, arg)
+
+
 
 /*----------------------------------- ENUMERATIONS ------------------------------------*/
 /*-------------------------- STRUCT/UNION/CLASS DATA TYPES ----------------------------*/
