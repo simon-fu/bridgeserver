@@ -33,23 +33,23 @@ void log_eice(int level, const char *data, int len)
 	
 	assert(data != NULL);
 	
-	LOG_INFO(data);
+	// LOG_INFO(data);
 
-	// switch (level)
-	// {
-	// case 1:
-	// 	LOG_ERROR(data);
-	// 	break;
-	// case 2:
-	// 	LOG_WARN(data);
-	// 	break;
-	// case 3:
-	// 	LOG_DEBUG(data);
-	// 	break;
-	// default:
-	// 	LOG_DEBUG(data);
-	// 	break;
-	// }	
+	switch (level)
+	{
+	case 1:
+		LOG_ERROR(data);
+		break;
+	case 2:
+		LOG_WARN(data);
+		break;
+	case 3:
+		LOG_DEBUG(data);
+		break;
+	default:
+		LOG_DEBUG(data);
+		break;
+	}	
 }
 
 void AppServer::ev_signal_cb(evutil_socket_t sig, short events, void *user_data)
@@ -84,6 +84,8 @@ void AppServer::start()
 	int port = atoi(iniFile_->top()("GLOBAL")["local_tcp_server_port"].c_str());
 	eice_set_get_nego_result_func(get_nego_result_func_callback);
 		
+	LOG_INFO("service at port " << port);
+
 	//创建一个event的实例
 	eventBase_ = event_base_new();
 	

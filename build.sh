@@ -17,7 +17,7 @@ function eice() {
 }
 
 function bridge() {
-	make $@
+	make -f $TOP_PATH/Makefile $@
 }
 
 if [ "x$1" = "xeice" ] ; then
