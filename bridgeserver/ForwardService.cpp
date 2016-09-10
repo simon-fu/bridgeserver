@@ -13,6 +13,7 @@
 #include "applog.h"
 #include "AppServer.h"
 #include "ForwardService.h"
+#include "xcutil.h"
 
 
 
@@ -135,75 +136,10 @@ bool ForwardService::Forward::isWebrtcAddr(const struct sockaddr_in& tempadd)
 }
 
 
-#define dbgv(...) do{  printf("<udp_dump>[D] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
-#define dbgi(...) do{  printf("<udp_dump>[I] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
-#define dbge(...) do{  printf("<udp_dump>[E] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
-
-#define     be_get_u16(xptr)   ((unsigned short) ( ((xptr)[0] << 8) | ((xptr)[1] << 0) ))     /* by simon */
-#define     be_set_u16(xval, xptr)  \
-do{\
-    (xptr)[0] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[1] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-
-#define     be_get_u24(xptr)   ((unsigned int) ( ((xptr)[0] << 16) | ((xptr)[1] << 8) | ((xptr)[2] << 0)))      /* by simon */
-#define     be_set_u24(xval, xptr)  \
-do{\
-    (xptr)[0] = (unsigned char) (((xval) >> 16) & 0x000000FF);\
-    (xptr)[1] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[2] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-
-
-#define     be_get_u32(xptr)   ((unsigned int) ((((unsigned int)(xptr)[0]) << 24) | ((xptr)[1] << 16) | ((xptr)[2] << 8) | ((xptr)[3] << 0)))        /* by simon */
-#define     be_set_u32(xval, xptr)  \
-do{\
-    (xptr)[0] = (unsigned char) (((xval) >> 24) & 0x000000FF);\
-    (xptr)[1] = (unsigned char) (((xval) >> 16) & 0x000000FF);\
-    (xptr)[2] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[3] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-
-
-/*
-* little-endian read/write
-*/
-
-#define     le_get_u16(xptr)   (unsigned short) ( ((xptr)[1] << 8) | ((xptr)[0] << 0) )
-#define     le_set_u16(xval, xptr)  \
-do{\
-    (xptr)[1] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[0] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-#define     le_get_u24(xptr)   (unsigned short) ( ((xptr)[2] << 16) | ((xptr)[1] << 8) | ((xptr)[0] << 0) )
-#define     le_set_u24(xval, xptr)  \
-do{\
-    (xptr)[2] = (unsigned char) (((xval) >> 16) & 0x000000FF);\
-    (xptr)[1] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[0] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-
-#define     le_get_u32(xptr)   (unsigned int) ((xptr)[3] << 24) | ((xptr)[2] << 16) | ((xptr)[1] << 8) | ((xptr)[0] << 0)
-#define     le_set_u32(xval, xptr)  \
-do{\
-    (xptr)[3] = (unsigned char) (((xval) >> 24) & 0x000000FF);\
-    (xptr)[2] = (unsigned char) (((xval) >> 16) & 0x000000FF);\
-    (xptr)[1] = (unsigned char) (((xval) >> 8) & 0x000000FF);\
-    (xptr)[0] = (unsigned char) (((xval) >> 0) & 0x000000FF);\
-}while(0)
-
-
-
+// #define dbgv(...) do{  printf("<udp_dump>[D] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
+// #define dbgi(...) do{  printf("<udp_dump>[I] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
+// #define dbge(...) do{  printf("<udp_dump>[E] " __VA_ARGS__); printf("\n"); fflush(stdout); }while(0)
+// 
 // static 
 // void dump_rtp(int packet_count, void* buf_, int len ){
 // 	const unsigned char * buf = (const unsigned char *)buf_;
@@ -239,23 +175,16 @@ do{\
 // 		, v, p, x, cc, m, pt, seq, ts, ssrc, header_len);
 // }
 
-static
-inline int64_t get_now_timestamp_ms(){ 
-    unsigned long milliseconds_since_epoch = 
-    std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch()).count();
-    return milliseconds_since_epoch;
-};
 
 static 
 inline int buildTimestamp(ForwardService::Forward * forward, int dataLen ){
 	unsigned char * buf = (unsigned char *)forward->buffer;
 
 	if(forward->start_time_base_ == 0){
-		forward->start_time_base_ = get_now_timestamp_ms();
+		forward->start_time_base_ = get_timestamp_ms();
 	}
 
-	int64_t elapsed = get_now_timestamp_ms() - forward->start_time_base_;
+	int64_t elapsed = get_timestamp_ms() - forward->start_time_base_;
 	unsigned int ts = (unsigned int) (9*elapsed); //90000*elapsed / 1000;
 	be_set_u32(ts, buf+4);
 

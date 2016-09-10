@@ -34,9 +34,9 @@ struct rtp_hdr
 class AudioRtpFilter
 {
 public:
-	AudioRtpFilter() : hop_(0), startTime_(0), needModTs_(true)
+	AudioRtpFilter() //: hop_(0), startTime_(0), needModTs_(true)
 	{
-		memset(&lastRtpHeader_, 0, sizeof(rtp_hdr));
+		// memset(&lastRtpHeader_, 0, sizeof(rtp_hdr));
 	}
 
 	bool filter(char* data, int dataLen, int sample_ratio)
@@ -70,11 +70,11 @@ public:
 
 
 private:
-	rtp_hdr			lastRtpHeader_;
-	unsigned int	hop_;			/**每个包的心跳间隔*/
-	unsigned int	startTime_;		/**rtp时戳开始时间*/
+	// rtp_hdr			lastRtpHeader_;
+	// unsigned int	hop_;			/**每个包的心跳间隔*/
+	// unsigned int	startTime_;		/**rtp时戳开始时间*/
 
-	bool			needModTs_;
+	// bool			needModTs_;
 };
 
 

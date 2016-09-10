@@ -21,7 +21,7 @@ AppServer g_app;
 int main(int argc, char *argv[])
 {
 	//使用damon，在后台运行
-	int iNoClose = 0;
+	// int iNoClose = 0;
 	//if (daemon(1, iNoClose) == -1) 
 	//{
 	//	perror("daemon() fail.");

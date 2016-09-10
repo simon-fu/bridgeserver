@@ -68,7 +68,7 @@ int main( int argc, char ** argv) {
 	runner.addTest(CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest());
 
 	bool ret = !runner.run();
-
+	LOG_INFO("!runner.run()=" << ret);
 	usleep(20000000);
 
 	LOG_INFO("------------------come main 2.");

@@ -7,7 +7,7 @@
 
 #include "xcutil.h"
 #include "xrtp_h264.h"
-// #define LOG_PLAY(...)
+#define LOG_PLAY(...)
 #define dbgd(...) //do{printf(__VA_ARGS__); printf("\n");}while(0)
 #define dbgi(...) do{printf(__VA_ARGS__); printf("\n");}while(0)
 
@@ -57,8 +57,8 @@ int xrtp_to_nalu_next(xrtp_to_nalu_t *ctx, const uint8_t *rtp, uint32_t rtp_len)
 
 	int& m_naltype = ctx->m_naltype;
 	const uint8_t *pRtpHeader = rtp;
-	unsigned char  media_type = pRtpHeader[1]&0x7F;
-	bool is_mark = pRtpHeader[1]&0x80;
+	// unsigned char  media_type = pRtpHeader[1]&0x7F;
+	// bool is_mark = pRtpHeader[1]&0x80;
 	unsigned int ts = *( (uint32_t*)(pRtpHeader + 4) );
 	ts = ntohl(ts);
 	unsigned short rtp_seq =  *( (uint16_t*)(pRtpHeader + 2) );
@@ -421,8 +421,8 @@ int test_rtp_nalu()
 		dbgd("NOT found nalu");
 	}
 
-	int nal_type = nalu[start] & 0x1F;
-	dbgd("got nalu: len=%d, type=%d", nalu_len, nal_type);
+	// int nal_type = nalu[start] & 0x1F;
+	// dbgd("got nalu: len=%d, type=%d", nalu_len, nal_type);
 
 	xnalu_to_rtp_t n2r;
 	xrtp_to_nalu_t r2n;
@@ -481,7 +481,7 @@ uint32_t rebase_timestamp(xtimestamp64 * tswrapper, int64_t &src_first_timestamp
 	int64_t timestamp64 = xtimestamp64_unwrap(tswrapper, timestamp);
 	if(src_first_timestamp < 0){
 		src_first_timestamp = timestamp64;
-		// dbgi("first timestamp %lld", src_first_timestamp);
+		dbgi("first timestamp %lld", src_first_timestamp);
 	}
 	timestamp = (uint32_t)(timestamp64 - src_first_timestamp);
 	be_set_u32(timestamp, rtp+4);

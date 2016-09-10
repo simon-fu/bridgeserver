@@ -140,7 +140,8 @@ public:
 class CcsConnection : public IceConnection
 {
 public:
-	CcsConnection(struct bufferevent *bev, CCS* server) : IceConnection(bev), server_(server) {}
+	CcsConnection(struct bufferevent *bev, CCS* server) : IceConnection(bev) //, server_(server)
+	 {}
 	~CcsConnection() {
 		callee_.stop();
 	}
@@ -233,7 +234,7 @@ public:
 private:
 	char	sendBuffer_[MAX_COMMAND_LEN];
 
-	CCS*		server_;
+	// CCS*		server_;
 	Callee		callee_;
 };
 

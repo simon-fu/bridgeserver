@@ -70,7 +70,7 @@ ALL_CC_OBJ += $(CCS_OBJ)
 
 
 
-MY_FLAGS= -g
+MY_FLAGS= -g -Wall
 # for MacOS
 MY_FLAGS += -fno-pie 
 
