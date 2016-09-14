@@ -38,13 +38,13 @@ struct IceCommand
 static const uint16_t ICE_COMMAND_HEADER_LEN = 16;	/**op 4 bytes + sessionId 8 bytes + content length 4 bytes.*/
 
 class IceConnectionBuilder :public ConnectionBuilder {
-	virtual Connection* create(bufferevent *bev);
+	virtual Connection* create(bufferevent *bev, xsockaddr * addr);
 };
 
 class IceConnection : public Connection
 {		
 public:
-	IceConnection(struct bufferevent *bev) : Connection(bev) {}
+	IceConnection(struct bufferevent *bev, xsockaddr * addr) : Connection(bev, addr) {}
 	virtual void handleCommand(const char *pDataBuffer, int nLength);
 	
 protected:

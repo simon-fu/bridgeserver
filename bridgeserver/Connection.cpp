@@ -12,9 +12,10 @@
 #include "TcpServer.h"
 #include "Connection.h"
 
-Connection::Connection(bufferevent* bev)
+Connection::Connection(bufferevent* bev, xsockaddr * addr)
 	: bufferEvent_(bev)
 	, canSend_(false)
+	, remoteAddr_(*addr)
 {
 	bufferevent_setcb(bufferEvent_, readCallback, writeCallback, eventCallback, this);
 	if (0 != bufferevent_enable(bufferEvent_, EV_READ | EV_WRITE)) {

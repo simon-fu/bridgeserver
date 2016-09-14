@@ -52,7 +52,7 @@ extern void start_test_util(CppUnit::TextUi::TestRunner& runner);
 int main( int argc, char ** argv) {			
 	LOG_INFO("Start.");
 
-	std::thread appThread(std::bind(&AppServer::start, &g_app));
+	std::thread appThread(std::bind(&AppServer::startAndLoop, &g_app));
 	usleep(100000);			/// wait complete g_app start
 
 	CppUnit::TextUi::TestRunner runner;

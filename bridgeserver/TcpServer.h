@@ -19,7 +19,9 @@ class TcpServer
 public:
 	TcpServer(unsigned short port, event_base *base, ConnectionBuilder* builder);
 	~TcpServer();
-
+    
+    bool start();
+    
 	/**@desc whether this conn is not disconnected.*/
 	bool haveConnection(Connection* conn) const;
 
@@ -35,6 +37,7 @@ private:
 
 private:
 	unsigned short			port_;		/**local server port*/
+    event_base *            base_;
 	struct evconnlistener *	listener_;
 
 	ConnectionBuilder*		connectionBuilder_;

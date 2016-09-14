@@ -12,10 +12,12 @@ struct event_base;
 struct bufferevent;
 class TcpServer;
 
+typedef struct sockaddr_in xsockaddr;
+
 class Connection
 {
 public:	
-	Connection(struct bufferevent *bev);
+	Connection(struct bufferevent *bev, xsockaddr * addr);
 	virtual ~Connection();
 
 	virtual void handleCommand(const char *pDataBuffer, int nLength) = 0;
@@ -27,6 +29,9 @@ public:
 	int send(const void *data, unsigned len);
 		
 	void setServer(TcpServer* server);
+	const xsockaddr * getRemoteAddr(){
+		return &remoteAddr_;
+	}
 
 private:
 	Connection(const Connection&);
@@ -41,10 +46,12 @@ private:
 	struct bufferevent *bufferEvent_;
 
 	bool				canSend_;
+
+	xsockaddr  			remoteAddr_;
 };
 
 class ConnectionBuilder{
 public:
 	virtual ~ConnectionBuilder() {}
-	virtual Connection* create(bufferevent *bev) = 0;
+	virtual Connection* create(bufferevent *bev, xsockaddr * addr) = 0;
 };

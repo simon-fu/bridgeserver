@@ -195,7 +195,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 		//SessionID sid = genSessionId();
 		if (sessions_.find(command.sessionId) != sessions_.end())
 		{
-			LOG_INFO("This session with id: " << command.sessionId << " is already existed!");
+			LOG_INFO("ICE_OP_PREPARE_SESSION: " << command.sessionId << " is already existed!");
 			break;
 		}
 		IceSession& is = sessions_[command.sessionId];
@@ -204,7 +204,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 		int content_len = 0;
 		if (eice_new_caller(iceJsonConfig(), sendBuffer_ + ICE_COMMAND_HEADER_LEN, &content_len, &is.endpoint) != 0)
 		{
-			LOG_WARN("something wrong with new ice endpoint !!!");
+			LOG_ERROR("ICE_OP_PREPARE_SESSION: eice_new_caller fail!!!");
 			is.setStatus(ICE_OP_END);
 			break;
 		}
@@ -420,8 +420,9 @@ void IceService::getNegoResult(eice_t obj)
 		
 	int ret = eice_get_nego_result(obj, session->iceResult, &session->iceResultLen);
 	assert(ret == 0 && session->iceResultLen > 0);
-	LOG_INFO("+++++++++get caller nego result OK, this result will use as local address at webrtc offer.");
-	LOG_INFO(session->iceResult);
+	// LOG_INFO("+++++++++get caller nego result OK, this result will use as local address at webrtc offer.");
+	// LOG_INFO(session->iceResult);
+	LOG_INFO("session[" << session->id << "] nego result: " << session->iceResult);
 	
 	// tell conference control server (request)	
 	assert(session->request != NULL);

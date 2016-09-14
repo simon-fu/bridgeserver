@@ -140,7 +140,7 @@ public:
 class CcsConnection : public IceConnection
 {
 public:
-	CcsConnection(struct bufferevent *bev, CCS* server) : IceConnection(bev) //, server_(server)
+	CcsConnection(struct bufferevent *bev, xsockaddr * addr, CCS* server) : IceConnection(bev, addr) //, server_(server)
 	 {}
 	~CcsConnection() {
 		callee_.stop();
@@ -187,7 +187,7 @@ public:
 				}
 			}
 
-			// tell sender, 将webrt已经协商好的结果写到配置文件中，js会议服务器之后读出来
+
 			int count = 0;
 			while (++count < 30)
 			{
@@ -243,7 +243,7 @@ private:
 class WebrtcConnection : public Connection
 {
 public:
-	WebrtcConnection(struct bufferevent *bev) : Connection(bev) {}
+	WebrtcConnection(struct bufferevent *bev, xsockaddr * addr) : Connection(bev, addr) {}
 	virtual void handleCommand(const char *data, int len)
 	{
 		LOG_DEBUG("receive " << data << "; len " << len);
@@ -256,7 +256,7 @@ private:
 	std::string		recvBuffer_;
 };
 class WebrtcConnectionBuilder :public ConnectionBuilder {
-	virtual Connection* create(bufferevent *bev) { return new WebrtcConnection(bev); }
+	virtual Connection* create(bufferevent *bev, xsockaddr * addr) { return new WebrtcConnection(bev, addr); }
 };
 
 
@@ -291,7 +291,6 @@ void CCS::startConferenceControlServer()
 	INI::Parser ini("config.ini");
 	unsigned server_port = atoi(ini.top()("GLOBAL")["local_tcp_server_port"].c_str());
 
-	//创建一个event的实例
 	eventBase_ = event_base_new();
 
 	struct sockaddr_in server_addr;
@@ -311,17 +310,16 @@ void CCS::startConferenceControlServer()
 	server_addr.sin_port = htons(server_port);
 
 	
-	struct bufferevent *client = bufferevent_socket_new(eventBase_, -1, BEV_OPT_CLOSE_ON_FREE);//创建SocketEvent对象
+	struct bufferevent *client = bufferevent_socket_new(eventBase_, -1, BEV_OPT_CLOSE_ON_FREE);
 	if (NULL == client)
 	{
 		LOG_ERROR("bufferevent_socket_new failed, can't connect  IM");
 		return;
 	}		
 	bufferevent_socket_connect(client, (struct sockaddr *)&server_addr, sizeof(server_addr));
-	bridgeClient_ = new CcsConnection(client, this);
+	bridgeClient_ = new CcsConnection(client, &server_addr, this);
 	
-
-	/// create a timer, 为测试方便，检查文件，看看是否需要启动新的测试		
+	
 	struct timeval tv;
 	event_assign(&timeout_, eventBase_, -1, EV_PERSIST, timeout_cb, this);
 	evutil_timerclear(&tv);
@@ -344,7 +342,6 @@ CCS::~CCS()
 }
 void CCS::start()
 {
-	/// 有多线程问题，暂时不管了
 	if (eventBase_ != NULL)
 		return;
 	thread_ = new std::thread(std::bind(&CCS::startConferenceControlServer, this));

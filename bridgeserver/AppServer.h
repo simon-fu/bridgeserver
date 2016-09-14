@@ -28,8 +28,10 @@ public:
 	AppServer();
 	~AppServer();
 
-	void start();
+	bool start_();
 	void stop();
+    void loop();
+    bool startAndLoop();
 
 	/**
 	* @desc other thread call function at this(main) thread.

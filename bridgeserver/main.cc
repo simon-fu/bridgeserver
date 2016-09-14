@@ -28,7 +28,9 @@ int main(int argc, char *argv[])
 	//	return -1;
 	//}
 			
-	g_app.start();
+    if(!g_app.startAndLoop()){
+        return -1;
+    }
 
     return 0;
 }

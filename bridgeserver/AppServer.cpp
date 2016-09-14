@@ -79,7 +79,7 @@ void get_nego_result_func_callback(eice_t obj)
 	g_app.call(std::bind(&IceService::getNegoResult, g_app.iceService(), obj));
 }
 
-void AppServer::start()
+bool AppServer::start_()
 {		
 	int port = atoi(iniFile_->top()("GLOBAL")["local_tcp_server_port"].c_str());
 	eice_set_get_nego_result_func(get_nego_result_func_callback);
@@ -90,18 +90,36 @@ void AppServer::start()
 	eventBase_ = event_base_new();
 	
 	iceServer_.reset(new TcpServer(port, eventBase_, new IceConnectionBuilder()));
+    if(!iceServer_->start()){
+        return false;
+    }
+    
 	iceService_.reset(new IceService());
 	mediaForwardService_.reset(new ForwardService());
 
 	eventThreadCall_.reset(new EventThreadCall(eventBase_));
 
-	struct event *	ev_signal = evsignal_new(eventBase_, SIGINT, ev_signal_cb, (void *)this);
-	event_add(ev_signal, NULL);
-	
-	event_base_dispatch(eventBase_);
+    return true;
+    
 
-	if (ev_signal)		event_free(ev_signal);
-	if (eventBase_)		event_base_free(eventBase_);
+}
+
+void AppServer::loop(){
+   	struct event *	ev_signal = evsignal_new(eventBase_, SIGINT, ev_signal_cb, (void *)this);
+    event_add(ev_signal, NULL);
+    
+    event_base_dispatch(eventBase_);
+    
+    if (ev_signal)		event_free(ev_signal);
+    if (eventBase_)		event_base_free(eventBase_);
+}
+
+bool AppServer::startAndLoop(){
+    if(!this->start_()){
+        return false;
+    }
+    this->loop();
+    return true;
 }
 
 AppServer::~AppServer()

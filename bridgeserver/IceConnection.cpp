@@ -26,9 +26,9 @@ std::string enumKey(ICE_OP value)
 	}
 }
 
-Connection* IceConnectionBuilder::create(bufferevent *bev)
+Connection* IceConnectionBuilder::create(bufferevent *bev, xsockaddr * addr)
 {
-	return new(std::nothrow) IceConnection(bev);
+	return new(std::nothrow) IceConnection(bev, addr);
 }
 
 void IceConnection::handleIceCommand(const IceCommand &command)
@@ -47,7 +47,7 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 	unsigned usedLen = 0;
 	recvBuffer_.append(pDataBuffer, dataLen);
 	IceCommand response;
-	while ((dataLen > totalUsedLen))
+	while ((dataLen > (int)totalUsedLen))
 	{
 		if (!parseCommand(response, recvBuffer_.data() + totalUsedLen, recvBuffer_.size() - totalUsedLen, usedLen))
 		{
