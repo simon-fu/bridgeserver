@@ -140,9 +140,9 @@ const char* IceService::iceJsonConfig()
 void IceService::sendCommand(IceSession& is, ICE_OP op, const char* data, uint32_t dataLen)
 {
 	if (dataLen > 0)
-		LOG_DEBUG("Send command *** " << enumKey(op) << "; Session id: " << is.id << "; data len " << dataLen << "; data: " << (data==NULL?sendBuffer_+ICE_COMMAND_HEADER_LEN:data));
+		LOG_INFO("Send command *** " << enumKey(op) << "; Session id: " << is.id << "; data len " << dataLen << "; data: " << (data==NULL?sendBuffer_+ICE_COMMAND_HEADER_LEN:data));
 	else
-		LOG_DEBUG("Send command *** " << enumKey(op) << "; Session id: " << is.id << "; data len " << dataLen);
+		LOG_INFO("Send command *** " << enumKey(op) << "; Session id: " << is.id << "; data len " << dataLen);
 
 	// tell sender local info
 	if (!constructCommandBuffer(sendBuffer_, op, is.id, data, dataLen)) {
