@@ -17,13 +17,15 @@
 
 
 
-void ForwardService::startForward(MEDIA_TYPE media, AddrPair& iceInfo, const sockaddr_in& webrtcAddr)
+void ForwardService::startForward(uint64_t sessionId, MEDIA_TYPE media, AddrPair& iceInfo, const sockaddr_in& webrtcAddr)
 {
 	assert(iceInfo.local_port > 0);
 		
 	LOG_INFO("Start forward, local " << iceInfo.local_ip << ":" << iceInfo.local_port
 		<< "; remote " << iceInfo.remote_ip << ":" << iceInfo.remote_port
-		<< "; webrtc addr: " << toHexString((char*)&webrtcAddr, sizeof(sockaddr_in)));
+		<< "; webrtc addr: " << toHexString((char*)&webrtcAddr, sizeof(sockaddr_in))
+        << "; media=" << media
+        << "; sid=" << sessionId);
 
 	if (iceInfo.local_port == 0){
 		LOG_WARN("error local port " << iceInfo.local_port);
@@ -56,6 +58,7 @@ void ForwardService::startForward(MEDIA_TYPE media, AddrPair& iceInfo, const soc
 
 	event_add(forward.ev_udp, NULL);
 
+    forward.sessionId = sessionId;
 	forward.iceInfo = iceInfo;	
 	forward.mediaType = media;
 	forward.webrtcAddr = webrtcAddr;	
@@ -85,6 +88,11 @@ void ForwardService::startForward(MEDIA_TYPE media, AddrPair& iceInfo, const soc
 	obj->start_time_base_ = 0;
 	obj->exist_timestamp_ = 0;
 	obj->force_build_timestamp = 1;
+    
+    obj->toWebrtcPackets = 0;
+    obj->toWebrtcBytes = 0;
+    obj->toV1Packets = 0;
+    obj->toV1Bytes = 0;
 }
 
 /// 清理不使用的会话
@@ -264,11 +272,19 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 			
 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->xmppAddr, addrLen);
 			LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to xmpp, port: " << ntohs(forward->xmppAddr.sin_port));
+            forward->toV1Packets += 1;
+            forward->toV1Bytes += dataLen;
 		}
 		else {
 			unsigned char h = forward->buffer[0];
 
-
+            if(h == 0xfa){
+                // delay (ping) , send back
+                sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&tempadd, addrLen);
+                continue;
+            }
+            
+            
 			if (forward->mediaType == MEDIA_VIDEO) {
 				// 如果是xmpp的重发请求，直接处理掉
 				if (forward->xmppVideoResend.handle(forward->buffer, dataLen))
@@ -280,6 +296,7 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 				}
 				maybeBuildTimestamp(forward, dataLen);
 				// dump_rtp(0, forward->buffer, dataLen);
+                
 				
 			} else if (forward->mediaType == MEDIA_AUDIO) {
 				if(h > 0x90){
@@ -291,10 +308,11 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 					continue;
 				// dump_rtp(0, forward->buffer, dataLen);
 			}
-
+            
 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->webrtcAddr, addrLen);
 			LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
-
+            forward->toWebrtcPackets += 1;
+            forward->toWebrtcBytes += dataLen;
 
 			// if (forward->mediaType == MEDIA_VIDEO) {
 			// 	// 如果是xmpp的重发请求，直接处理掉
@@ -343,6 +361,18 @@ ForwardService::Forward::Forward() : lastPackageTime(time(NULL)) {
 }
 
 ForwardService::Forward::~Forward() {
+    
+    const char * media;
+    if(this->mediaType == MEDIA_VIDEO){
+        media = "video";
+    }else if(this->mediaType == MEDIA_AUDIO){
+        media = "audio";
+    }else{
+        media = "unknown";
+    }
+    LOG_INFO("toWebrtc: sid=" << this->sessionId << ", m=" << media << ", pkts=" << this->toWebrtcPackets << ", bytes=" << this->toWebrtcBytes);
+    LOG_INFO("toV1    : sid=" << this->sessionId << ", m=" << media << ", pkts=" << this->toV1Packets     << ", bytes=" << this->toV1Bytes);
+    
 	if (iceInfo.local_fd > 0){
 		evutil_closesocket(iceInfo.local_fd);
 	}

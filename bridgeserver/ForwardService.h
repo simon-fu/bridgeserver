@@ -13,7 +13,7 @@
 #include "MediaFilter.h"
 #include "xrtp_h264.h"
 
-static const int FORWARD_ALIVE_CHECK_TIME = 10 * 60;	/**10 minute.*/
+static const int FORWARD_ALIVE_CHECK_TIME = 30;	/**10 minute.*/
 static const int MAX_UDP_PACKET_LEN = 10 * 1024;
 
 enum MEDIA_TYPE {
@@ -46,6 +46,7 @@ public:
 		}
 	};
 	struct Forward {
+        uint64_t        sessionId;
 		AddrPair		iceInfo;
 		MEDIA_TYPE		mediaType;
 
@@ -70,6 +71,11 @@ public:
 	int64_t start_time_base_;
 	int exist_timestamp_;
 	int force_build_timestamp;
+        
+        int64_t toWebrtcPackets;
+        int64_t toWebrtcBytes;
+        int64_t toV1Packets;
+        int64_t toV1Bytes;
 
 
 		bool isWebrtcAddr(const struct sockaddr_in& tempadd);
@@ -82,7 +88,7 @@ public:
 	ForwardService();
 	virtual ~ForwardService() ;
 
-	void startForward(MEDIA_TYPE media, AddrPair& addr_pairs, const sockaddr_in& webrtcAddr);
+	void startForward(uint64_t sessionId, MEDIA_TYPE media, AddrPair& addr_pairs, const sockaddr_in& webrtcAddr);
 		
 private:
 	static void udpCallback(evutil_socket_t fd, short what, void *arg);

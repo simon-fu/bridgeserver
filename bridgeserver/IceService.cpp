@@ -327,13 +327,13 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 					addr_pairs[0].remote_port = 10000;
 				}
 				// for forward audio/video				
-				g_app.forwardService()->startForward(MEDIA_AUDIO, addr_pairs[0], webrtcAddr);
+				g_app.forwardService()->startForward(is.id, MEDIA_AUDIO, addr_pairs[0], webrtcAddr);
 			}
 			else {
 				webrtcAddr.sin_port = htons(addrInfo["video"]["port"].asUInt());
 				webrtcAddr.sin_addr.s_addr = inet_addr(addrInfo["video"]["ip"].asString().data());
 
-				g_app.forwardService()->startForward(MEDIA_VIDEO, addr_pairs[0], webrtcAddr);
+				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[0], webrtcAddr);
 			}
 			// 每一对后面一对（1/3）是用作rtcp的，忽略掉
 			if (addr_pairs.size() > 2) {
@@ -345,7 +345,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 					addr_pairs[2].remote_ip = "172.17.2.51";
 					addr_pairs[2].remote_port = 10002;
 				}
-				g_app.forwardService()->startForward(MEDIA_VIDEO, addr_pairs[2], webrtcAddr);
+				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[2], webrtcAddr);
 			}
 		}
 		catch (...)
