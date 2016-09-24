@@ -192,7 +192,9 @@ int main(int argc, char *argv[])
 {
     icky_global_program_name = argv[0];
     signal(SIGSEGV, SignalHandle);
+    signal(SIGABRT, SignalHandle);
 //    crash_me();
+//    assert(0);
     
 	//使用damon，在后台运行
 	// int iNoClose = 0;

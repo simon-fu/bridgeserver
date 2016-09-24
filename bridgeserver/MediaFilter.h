@@ -112,7 +112,7 @@ public:
 	VideoResendService(): rtpPackages_(MAX_CACHE_RTP_PKT_COUNT) {
 		supportResend_ = g_app.iniFile().top()("GLOBAL")["xmpp_resend_video"] != "false";
 		LOG_INFO("Receive video enable: " << supportResend_ );
-		printf("Receive video enable: %d\n", supportResend_);
+//		printf("Receive video enable: %d\n", supportResend_);
 	}
 
 	void setUdpSendFunctor(const UdpSendFunctor& send) {
