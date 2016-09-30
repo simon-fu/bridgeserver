@@ -613,6 +613,41 @@ int xrtp_h264_repacker_next(xrtp_h264_repacker * obj, unsigned char * rtp){
 }
 
 
+void dump_rtp_to_str(const char *prefix, const unsigned char * buf, int len, char * str_buf, size_t str_buf_size){
+    
+//    char prefix[16];
+//    sprintf(prefix, "No.%d", packet_count);
+    
+    if(len < 12){
+        sprintf(str_buf, "%s rtp[too short len %d]", prefix, len);
+        return;
+    }
+    
+    unsigned char v =  (buf[0]>>6) & 0x3;
+    unsigned char p =  (buf[0]>>5) & 0x1;
+    unsigned char x =  (buf[0]>>4) & 0x1;
+    unsigned char cc = (buf[0]>>0) & 0xF;
+    unsigned char m =  (buf[1]>>7) & 0x1;
+    unsigned char pt = (buf[1]>>0) & 0x7F;
+    unsigned short seq = be_get_u16(buf+2);
+    unsigned int ts = be_get_u32(buf+4);
+    unsigned int ssrc = be_get_u32(buf+8);
+    
+    int header_len = 12 + cc * 4;
+    if(x){
+        int min = header_len + 4;
+        if(min <= len){
+            int ext_len = be_get_u16(buf+header_len+2);
+            header_len += 4+ext_len*4;
+        }else{
+            header_len = -1;
+        }
+    }
+    
+    sprintf(str_buf, "%s rtp[v=%d,p=%d,x=%d,cc=%d,m=%d,pt=%d,seq=%d,ts=%d,ssrc=%d,pl=%d]", prefix
+         , v, p, x, cc, m, pt, seq, ts, ssrc, header_len);
+}
+
 
 
 #if 0

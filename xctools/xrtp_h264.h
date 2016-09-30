@@ -104,6 +104,8 @@ int xrtp_h264_repacker_input(xrtp_h264_repacker * obj, unsigned char * rtp, int 
 int xrtp_h264_repacker_next(xrtp_h264_repacker * obj, unsigned char * rtp);
 
 
+void dump_rtp_to_str(const char *prefix, const unsigned char * buf, int len, char * str_buf, size_t str_buf_size);
+
 #ifdef __cplusplus
 };
 #endif

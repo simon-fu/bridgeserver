@@ -25,8 +25,8 @@ static const int AUDIO_RATIO_WEBRTC2XMPP = -3;
 
 
 /**
-���յ������ݰ��еõ����ǵ�ַ��socket�ĳ��ڵ�ַ��
-Ŀǰ����Ϊwebrtc answer�еõ��ĵ�ַ�����������ͬ�ģ� 
+¥” ’µΩµƒ ˝æ›∞¸÷–µ√µΩµƒ «µÿ÷∑ «socketµƒ≥ˆø⁄µÿ÷∑°£
+ƒø«∞£¨»œŒ™webrtc answer÷–µ√µΩµƒµÿ÷∑∫Õ∆‰≥ˆø⁄ «œ‡Õ¨µƒ£ª 
 */
 class ForwardService {
 	friend class TestForward;
@@ -60,8 +60,10 @@ public:
 		time_t			lastPackageTime;		/**long time(for example: 10min) no package, will terminate it.*/
 
 		VideoRtpFilter		videoFilter;
-		VideoResendService	xmppVideoResend;	/** xmpp�ͻ����ж����ط��������� */
+		VideoResendService	xmppVideoResend;	/** xmppøÕªß∂À”–∂™∞¸÷ÿ∑¢µƒ«Î«Û¥¶¿Ì */
 		AudioRtpFilter		audioFilter;
+        uint32_t audio_ssrc;
+        uint32_t video_ssrc;
 
 	xrtp_h264_repacker video_repacker_;
 	xrtp_transformer audio_transformer_;
@@ -104,7 +106,7 @@ private:
 	struct event	timer_;		
 		
 	ForwardMap		forwards_;
-
+    uint32_t        current_ssrc_;
 
 
 };

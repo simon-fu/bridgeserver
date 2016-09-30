@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
     signal(SIGSEGV, SignalHandle);
     signal(SIGABRT, SignalHandle);
     printf("APP_VER = %s\n", APP_VER_STR);
+    LOG_INFO("APP_VER = " << APP_VER_STR);
 //    crash_me();
 //    assert(0);
     

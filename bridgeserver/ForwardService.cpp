@@ -14,6 +14,7 @@
 #include "AppServer.h"
 #include "ForwardService.h"
 #include "xcutil.h"
+#include "xrtp_h264.h"
 
 
 
@@ -71,6 +72,15 @@ void ForwardService::startForward(uint64_t sessionId, MEDIA_TYPE media, AddrPair
 //	forward.xmppVideoResend.setUdpSendFunctor([=](const char* data, int len){
 //		return sendto(local_fd, data, len, 0, (struct sockaddr*)&forward.xmppAddr, sizeof(struct sockaddr_in));
 //	});
+    
+    
+    if(current_ssrc_ < 100000 || current_ssrc_ >= 30000000){
+        current_ssrc_ = 100000;
+    }
+    forward.audio_ssrc = current_ssrc_ + 0;
+    forward.video_ssrc = current_ssrc_ + 1;
+    current_ssrc_ += 2;
+
 
 	
 	uint32_t local_ssrc = 0x1234;
@@ -117,7 +127,7 @@ void ForwardService::timeout_cb(evutil_socket_t fd, short event, void *arg)
 }
 
 
-ForwardService::ForwardService() {
+ForwardService::ForwardService():current_ssrc_(0) {
 	/// create a timer		
 	struct timeval tv;
 	event_assign(&timer_, g_app.eventBase(), -1, EV_PERSIST, timeout_cb, this);
@@ -157,7 +167,7 @@ bool ForwardService::Forward::isWebrtcAddr(const struct sockaddr_in& tempadd)
 // 		dbgi("%s rtp len too small %d", prefix, len);
 // 		return;
 // 	}
-
+//
 // 	unsigned char v =  (buf[0]>>6) & 0x3;
 // 	unsigned char p =  (buf[0]>>5) & 0x1;
 // 	unsigned char x =  (buf[0]>>4) & 0x1;
@@ -167,7 +177,7 @@ bool ForwardService::Forward::isWebrtcAddr(const struct sockaddr_in& tempadd)
 // 	unsigned short seq = be_get_u16(buf+2);
 // 	unsigned int ts = be_get_u32(buf+4);
 // 	unsigned int ssrc = be_get_u32(buf+8);
-	
+//	
 // 	int header_len = 12 + cc * 4;
 // 	if(x){
 // 		int min = header_len + 4;
@@ -178,7 +188,7 @@ bool ForwardService::Forward::isWebrtcAddr(const struct sockaddr_in& tempadd)
 // 			header_len = -1;
 // 		}
 // 	}
-
+//
 // 	dbgi("%s rtp[v=%d,p=%d,x=%d,cc=%d,m=%d,pt=%d,seq=%d,ts=%d,ssrc=%d,pl=%d]", prefix
 // 		, v, p, x, cc, m, pt, seq, ts, ssrc, header_len);
 // }
@@ -306,7 +316,9 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 
 				if (!forward->audioFilter.filter(forward->buffer, dataLen, -AUDIO_RATIO_WEBRTC2XMPP))
 					continue;
-				// dump_rtp(0, forward->buffer, dataLen);
+//                uint32_t ssrc = (uint32_t)((uint64_t)forward);
+                be_set_u32(forward->audio_ssrc, forward->buffer+8);
+//                dump_rtp(0, forward->buffer, dataLen);
 			}
             
 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->webrtcAddr, addrLen);
