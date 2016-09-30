@@ -150,6 +150,11 @@ else
 
 endif
 
+# git log --pretty=oneline
+GIT_COMMIT_VER := $(shell git log --format=format:%H -n 1)
+CFLAGS += -DAPP_VER=$(GIT_COMMIT_VER)
+CPPFLAGS += -DAPP_VER=$(GIT_COMMIT_VER)
+
 
 all: $(TARGETS)
 	@echo build success
@@ -211,6 +216,7 @@ print:
 	@echo ALL_C_SRC=[$(ALL_C_SRC)]
 	@echo ----------------------
 	@echo ALL_CPP_SRC=[$(ALL_CPP_SRC)]
+	@echo GIT_COMMIT_VER=$(GIT_COMMIT_VER)
 
 
 

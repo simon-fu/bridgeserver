@@ -15,6 +15,11 @@ osx
 
 	brew install cppunit log4cplus libevent
 	
+centos 7.2.1511  
+
+	yum install portaudio-devel log4cplus-devel cppunit-devel boost-devel
+	
+	
 ### build main
 	cd lib && ln -s ubuntu/libeice-full.a && cd ..
 	./build.sh

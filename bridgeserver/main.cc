@@ -24,7 +24,14 @@ static FILE * g_log_fp = NULL;
 #define dbgi(...) do{  if(!g_log_fp) break; fprintf(g_log_fp, "<main>[I] " __VA_ARGS__); fprintf(g_log_fp, "\n"); fflush(g_log_fp); }while(0)
 #define dbge(...) do{  if(!g_log_fp) break; fprintf(g_log_fp, "<main>[E] " __VA_ARGS__); fprintf(g_log_fp, "\n"); fflush(g_log_fp); }while(0)
 
+#define _MAKE_STR(x) #x
+#define MAKE_STR(x) _MAKE_STR(x)
 
+#ifndef APP_VER
+#define APP_VER_STR "unknown-version"
+#else
+#define APP_VER_STR MAKE_STR(APP_VER)
+#endif
 
 static
 void open_stack_log(const char * exeNamePath){
@@ -73,7 +80,7 @@ void print_call_stack()
     dbgi("callstack frames %d", frames);
     for (i = 0; i < frames; ++i) {
         //		printf("%s\n", strs[i]);
-        dbgi("callstack %d : %s\n", i, strs[i]);
+        dbgi("callstack %d : %s", i, strs[i]);
 //        LOG_ERROR("callstack " << i << " : " << strs[i]);
     }
     free(strs);
@@ -162,7 +169,7 @@ static void posix_print_stack_trace()
     {
         if (addr2line(icky_global_program_name, stack_traces[i]) != 0)
         {
-            dbgi("  error determining line # for: %s\n", messages[i]);
+            dbgi("  error determining line # for: %s", messages[i]);
 //            LOG_ERROR("  error determining line # for:  " << messages[i]);
         }
         
@@ -172,19 +179,21 @@ static void posix_print_stack_trace()
 
 static void SignalHandle(int sig){
     open_stack_log(icky_global_program_name);
-    print_call_stack();
 //    LOG_ERROR("============================" );
-    dbgi("============================\n");
+    dbgi("============================");
+    dbgi("APP_VER = %s", APP_VER_STR);
+    print_call_stack();
+    dbgi("-------");
     posix_print_stack_trace();
     close_stack_log();
     exit(1);
 }
 
-//static
-//void crash_me(){
-//	char *p = 0;
-//	*p = 0;
-//}
+// static
+// void crash_me(){
+// 	char *p = 0;
+// 	*p = 0;
+// }
 
 AppServer g_app;
 
@@ -193,6 +202,7 @@ int main(int argc, char *argv[])
     icky_global_program_name = argv[0];
     signal(SIGSEGV, SignalHandle);
     signal(SIGABRT, SignalHandle);
+    printf("APP_VER = %s\n", APP_VER_STR);
 //    crash_me();
 //    assert(0);
     
