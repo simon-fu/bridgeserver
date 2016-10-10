@@ -54,6 +54,7 @@ bool checkStatus(ICE_OP cur_status, ICE_OP new_status)
 	return ret;
 }
 
+static
 void get_addr_pairs_from_result(eice_t obj, const char * caller_result, std::vector<AddrPair>& addr_pairs){
 	update_steal_sockets(obj);
 
@@ -85,7 +86,28 @@ void get_addr_pairs_from_result(eice_t obj, const char * caller_result, std::vec
 				AddrPair& ap = addr_pairs.back();
 				LOG_DEBUG("store No." << addr_pairs.size()-1 << " pair fd=" << ap.local_fd << ", local_port=" << ap.local_port << ", remote_port=" << ap.remote_port);								
 			}			
-		}
+        }else if(!relay_pairs_value.isNull()){
+            for (unsigned i = 0; i < relay_pairs_value.size(); i++) {
+                int port = relay_pairs_value[i]["local"]["port"].asInt();
+                int fd = eice_get_global_socket(obj, port);
+                if (fd < 0) {
+                    LOG_ERROR("relaypair: fail to get socket at " << i << " , port " << port << "!!!");
+                    //	break;
+                }
+                
+                addr_pairs.push_back(AddrPair(relay_pairs_value[i]["local"]["ip"].asString()
+                                              , relay_pairs_value[i]["local"]["port"].asInt()
+                                              , relay_pairs_value[i]["remote"]["ip"].asString()
+                                              , relay_pairs_value[i]["remote"]["port"].asInt()
+                                              , fd));
+                
+                AddrPair& ap = addr_pairs.back();
+                LOG_INFO("relaypair: store No." << addr_pairs.size()-1
+                         << ", pair fd=" << ap.local_fd
+                         << ", local_addr=" << ap.local_ip << ":" << ap.local_port
+                         << ", remote_addr=" << ap.remote_ip << ":" << ap.remote_port);
+            }
+        }
 	} 
 	catch (...)
 	{
@@ -111,7 +133,7 @@ bool constructCommandBuffer(char* buffer, ICE_OP op, SessionID id, const char* d
 }
 
 
-IceService::IceService()
+IceService::IceService():isCaller_(false),isExistRelayMS_(false)
 {
 //	iceJsonConfig_ = g_app.iniFile().ReadSessionStr("GLOBAL", "ice_json_config", "");	
 	iceJsonConfig_ = g_app.iniFile().top()("GLOBAL")["ice_json_config"];	
@@ -133,10 +155,25 @@ IceService::IceService()
 
 const char* IceService::iceJsonConfig()
 {
+    Json_em::Value	configValue(configInfo_);
 	Json_em::FastWriter writer;
-	iceJsonConfig_ = writer.write(configInfo_);
+//    if(isCaller_){
+        if(isExistRelayMS_){
+            if(configValue.isMember("turnAddrs")){
+//                configValue["turnAddrs"] = Json_em::nullValue;
+                configValue.removeMember("turnAddrs");
+            }
+        }
+//    }
+	iceJsonConfig_ = writer.write(configValue);
 	return iceJsonConfig_.c_str();
 }
+
+std::string& IceService::remoteContent(){
+
+    return remoteContent_;
+}
+
 void IceService::sendCommand(IceSession& is, ICE_OP op, const char* data, uint32_t dataLen)
 {
 	if (dataLen > 0)
@@ -157,7 +194,7 @@ void IceService::sendCommand(IceSession& is, ICE_OP op, const char* data, uint32
 	}
 }
 
-void IceService::readJsonInfo(const std::string& json)
+void IceService::readJsonInfo(const std::string& json, bool isCaller)
 {
 	if (json.empty())
 		return;
@@ -165,15 +202,29 @@ void IceService::readJsonInfo(const std::string& json)
 	try
 	{		
 		Json_em::Reader json_reader;
-		Json_em::Value addrInfo;
+		Json_em::Value &addrInfo  = remoteContentValue_;
 		if (!json_reader.parse(json, addrInfo)) {
 			LOG_WARN("parse json info: " << json << ", fail!!!");
 			return;
 		}
 
 		if (addrInfo.isMember("compCount")) {
-			configInfo_["comCount"] = addrInfo["comCount"];
+			configInfo_["compCount"] = addrInfo["compCount"];
 		}
+        
+        isExistRelayMS_ = addrInfo.isMember("relayMS");
+        
+        if (isCaller && isExistRelayMS_) {
+            configInfo_["relayMS"] = addrInfo["relayMS"];
+        }
+        isCaller_ = isCaller;
+        
+//        if(isExistRelayMS_ && addrInfo.isMember("turnAddrs")){
+//            addrInfo.removeMember("turnAddrs");
+//        }
+        Json_em::FastWriter writer;
+        remoteContent_ = writer.write(addrInfo);
+        
 	}
 	catch (...){
 		LOG_WARN("parse json info: " << json << ", exception!!!");
@@ -189,7 +240,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 	{	
 	case ICE_OP_PREPARE_SESSION:
 	{
-		readJsonInfo(command.content);
+		readJsonInfo(command.content, true);
 		LOG_DEBUG("config json info: " << iceJsonConfig());
 
 		//SessionID sid = genSessionId();
@@ -257,7 +308,8 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 		is.request = sender;	
 		int content_len = 0;		
 		// reuse send buffer
-		if (eice_new_callee(iceJsonConfig(), command.content.data(), command.content.size(), sendBuffer_ + ICE_COMMAND_HEADER_LEN, &content_len, &is.endpoint) != 0)
+        std::string& rcontent = remoteContent();
+		if (eice_new_callee(iceJsonConfig(), rcontent.data(), rcontent.size(), sendBuffer_ + ICE_COMMAND_HEADER_LEN, &content_len, &is.endpoint) != 0)
 		{
 			LOG_WARN("something wrong with new ice endpoint !!!");
 			break;

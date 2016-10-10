@@ -74,6 +74,7 @@ public:
 	void getNegoResult(eice_t obj);
 
 	const char* iceJsonConfig();
+    std::string& remoteContent();
 
 private:
 	SessionID genSessionId() { static SessionID id = 0; return ++id; }
@@ -81,11 +82,11 @@ private:
 	IceSession* findSesssionByEp(eice_t ep);
 
 	/**
-	*@desc ·ÖÎöÊÕµ½µÄÊı¾İ£¬ÓĞÒ»Ğ©ÌØ¶¨µÄÊı¾İĞèÒª´¦Àí
-	*param[in] json: ÊÕµ½µÄjson¸ñÊ½Êı¾İ
-	* ËµÃ÷£º Ä¿Ç°ÔÚ¿ªÊ¼Ê±(prepare/join), ĞèÒªÓĞÒ»¸öĞèÒªĞ­ÉÌµÄÒµÎñÊıÁ¿£¨compCount£©
+	*@desc âˆ‘Ã·Å’Ë†Â â€™ÂµÎ©ÂµÆ’Â ËÃ¦â€ºÂ£Â¨â€â€“â€œÂªâ€“Â©ÃƒÃ¿âˆ‚Â®ÂµÆ’Â ËÃ¦â€ºâ€“Ã‹â€œâ„¢Â¥Â¶Â¿ÃŒ
+	*param[in] json: Â â€™ÂµÎ©ÂµÆ’jsonâˆÃ’Â Î©Â ËÃ¦â€º
+	* Ã€ÂµâˆšËœÂ£âˆ« Æ’Ã¸Â«âˆâ€˜â„Ã¸â„¢Â ÂºÂ Â±(prepare/join), â€“Ã‹â€œâ„¢â€â€“â€œÂªâˆË†â€“Ã‹â€œâ„¢â€“â‰ â€¦ÃƒÂµÆ’â€œÂµÅ’Ã’Â ËÂ¡Ã¸Â£Â®compCountÂ£Â©
 	*/
-	void readJsonInfo(const std::string& json);
+	void readJsonInfo(const std::string& json, bool isCaller = false);
 
 	static void timeout_cb(evutil_socket_t fd, short event, void *arg);
 
@@ -97,8 +98,14 @@ private:
 	std::string		iceJsonConfig_;					/**include ice server info*/
 	Json_em::Value	configInfo_;
 
-	std::string		testIP_;						/** Îª²âÊÔ·½±ã£¬ÔËĞĞÔÚÅäÖÃÎÄ¼şÖĞÖ¸¶¨²âÊÔµØÖ·£¬×¢Òâ£ºÔÚÊµ¼Ê¹¤×÷ÖĞÒ»¶¨ÒªÈ¥µôÕâ¸öÅäÖÃ£¡ */
+	std::string		testIP_;						/** Å’â„¢â‰¤â€šÂ â€˜âˆ‘Î©Â±â€Â£Â¨â€˜Ã€â€“â€“â€˜â„â‰ˆâ€°Ã·âˆšÅ’Æ’ÂºË›Ã·â€“Ã·âˆâˆ‚Â®â‰¤â€šÂ â€˜ÂµÃ¿Ã·âˆ‘Â£Â¨â—ŠÂ¢â€œâ€šÂ£âˆ«â€˜â„Â ÂµÂºÂ Ï€Â§â—ŠËœÃ·â€“â€œÂªâˆ‚Â®â€œâ„¢Â»â€¢ÂµÃ™â€™â€šâˆË†â‰ˆâ€°Ã·âˆšÂ£Â° */
 
 	char			sendBuffer_[MAX_COMMAND_LEN];	/** command buffer for send data to service requester*/
+    
+    bool            isCaller_;
+    bool            isExistRelayMS_;
+    std::string		remoteContent_;
+    Json_em::Value  remoteContentValue_;
+    
 };
 

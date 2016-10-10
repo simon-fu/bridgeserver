@@ -810,7 +810,7 @@ static pj_bool_t on_data_recvfrom(pj_activesock_t *asock,
     pj_uint8_t pkt_type = buf[0];
     pj_uint32_t len = (pj_uint32_t)size;
     
-    dbgi("recvfrom bytes %d", size);
+//    dbgi("recvfrom bytes %d", size);
     pj_grp_lock_acquire(obj->grp_lock);
     switch(pkt_type)
     {
@@ -1646,6 +1646,8 @@ struct eice_st{
 	void close_steal_sockets();
 	void update_steal_sockets();
 	int eice_get_global_socket(int port);
+    
+    int already_cb_result;
 };
 
 
@@ -1988,6 +1990,36 @@ static void dump_eice_config(eice_t obj, eice_config * cfg){
     dbgi("<=== eice_config ===");
 }
 
+static
+void check_callback_nego_result(eice_t obj , const char * reason){
+    int call = 0;
+    pj_lock_acquire(obj->lock);
+    if(!obj->already_cb_result){
+        
+        int nego_done = 1; // default done, in case of icest disabled
+        int confice_done = 1;  // default done, in case of confice disabled
+        
+        if(obj->icest && !obj->force_relay){
+            nego_done = obj->ice_nego_done;
+        }
+        if(obj->confice){
+            confice_done = obj->confice_done;
+        }
+        
+
+        if(nego_done && confice_done){
+            obj->already_cb_result = 1;
+            call = 1;
+        }
+    }
+    pj_lock_release(obj->lock);
+    
+    // tell user to get ice result
+    if (call && g_nego_result_func != NULL) {
+        dbgi("callback nego result, reason [%s]", reason);
+        g_nego_result_func(obj);
+    }
+}
 
 static void cb_on_ice_complete(pj_ice_strans *ice_st, pj_ice_strans_op op,
 		pj_status_t status) {
@@ -2031,10 +2063,7 @@ static void cb_on_ice_complete(pj_ice_strans *ice_st, pj_ice_strans_op op,
             }
         }
 
-		// tell user to get ice result
-		if (g_nego_result_func != NULL) {
-			g_nego_result_func(obj);
-		}
+        check_callback_nego_result(obj, "nego result");
 	}
 		break;
 	default: {
@@ -2051,9 +2080,9 @@ static void on_confice_complete(confice_t cice, confice_op op, int status){
     if(op == CONF_OP_FINAL){
         obj->confice_done = 1;
         obj->confice_status = status;
-        
     }
     pj_lock_release(obj->lock);
+    check_callback_nego_result(obj, "confice result");
 }
 
 
@@ -2304,6 +2333,7 @@ static void timer_ice_cb(pj_timer_heap_t *th, pj_timer_entry *te)
     
     
     pj_lock_release(obj->lock);
+    check_callback_nego_result(obj, "ice timeout");
 }
 
 

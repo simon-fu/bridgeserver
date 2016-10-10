@@ -44,10 +44,10 @@ void log_eice(int level, const char *data, int len)
 		LOG_WARN(data);
 		break;
 	case 3:
-		LOG_DEBUG(data);
+		LOG_INFO(data);
 		break;
 	default:
-		LOG_DEBUG(data);
+		LOG_DEBUG(data); 
 		break;
 	}	
 }

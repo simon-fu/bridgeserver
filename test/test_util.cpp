@@ -107,8 +107,8 @@ public:
 
 		CPPUNIT_ASSERT(configInfo_.isMember("compCount"));
 
-		configInfo_["comCount"] = Json_em::Value(4);
-		CPPUNIT_ASSERT(configInfo_["comCount"].asInt() == 4);
+		configInfo_["compCount"] = Json_em::Value(4);
+		CPPUNIT_ASSERT(configInfo_["compCount"].asInt() == 4);
 
 
 		memset(data, 0, 20);
