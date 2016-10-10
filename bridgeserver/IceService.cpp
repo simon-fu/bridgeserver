@@ -2,6 +2,7 @@
 #include <assert.h>
 
 #include <arpa/inet.h>
+#include <unistd.h> // close
 
 #include "applog.h"
 
@@ -100,6 +101,12 @@ void get_addr_pairs_from_result(eice_t obj, const char * caller_result, std::vec
                                               , relay_pairs_value[i]["remote"]["ip"].asString()
                                               , relay_pairs_value[i]["remote"]["port"].asInt()
                                               , fd));
+                
+                addr_pairs.push_back(AddrPair("0"
+                                              , -1
+                                              , "0"
+                                              , -1
+                                              , -1));
                 
                 AddrPair& ap = addr_pairs.back();
                 LOG_INFO("relaypair: store No." << addr_pairs.size()-1
@@ -380,12 +387,20 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 				}
 				// for forward audio/video				
 				g_app.forwardService()->startForward(is.id, MEDIA_AUDIO, addr_pairs[0], webrtcAddr);
+                if(addr_pairs[1].local_fd > 0){
+                    close(addr_pairs[1].local_fd);
+                    addr_pairs[1].local_fd = -1;
+                }
 			}
 			else {
 				webrtcAddr.sin_port = htons(addrInfo["video"]["port"].asUInt());
 				webrtcAddr.sin_addr.s_addr = inet_addr(addrInfo["video"]["ip"].asString().data());
 
 				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[0], webrtcAddr);
+                if(addr_pairs[1].local_fd > 0){
+                    close(addr_pairs[1].local_fd);
+                    addr_pairs[1].local_fd = -1;
+                }
 			}
 			// 每一对后面一对（1/3）是用作rtcp的，忽略掉
 			if (addr_pairs.size() > 2) {
@@ -398,6 +413,10 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 					addr_pairs[2].remote_port = 10002;
 				}
 				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[2], webrtcAddr);
+                if(addr_pairs[3].local_fd > 0){
+                    close(addr_pairs[3].local_fd);
+                    addr_pairs[3].local_fd = -1;
+                }
 			}
 		}
 		catch (...)
