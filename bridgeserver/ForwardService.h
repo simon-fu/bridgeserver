@@ -42,7 +42,17 @@ public:
 		};
 		bool operator<(const Address& addr) const 
 		{
-			return (ip < addr.ip) || (port < addr.port);
+            std::string thisIp = this->ip;
+            std::string otherIp = addr.ip;
+            if(thisIp < otherIp){
+                return true;
+            }
+            if(thisIp > otherIp){
+                return false;
+            }
+            return (port < addr.port);
+            
+//			return (ip < addr.ip) || (port < addr.port);
 		}
 	};
 	struct Forward {
