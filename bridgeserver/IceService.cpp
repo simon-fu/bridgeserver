@@ -388,6 +388,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 				// for forward audio/video				
 				g_app.forwardService()->startForward(is.id, MEDIA_AUDIO, addr_pairs[0], webrtcAddr);
                 if(addr_pairs[1].local_fd > 0){
+                    LOG_INFO("session[" << command.sessionId << "] close local addr " << addr_pairs[1].local_ip << ":"  << addr_pairs[1].local_port);
                     close(addr_pairs[1].local_fd);
                     addr_pairs[1].local_fd = -1;
                 }
@@ -398,6 +399,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 
 				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[0], webrtcAddr);
                 if(addr_pairs[1].local_fd > 0){
+                    LOG_INFO("session[" << command.sessionId << "] close local addr " << addr_pairs[1].local_ip << ":"  << addr_pairs[1].local_port);
                     close(addr_pairs[1].local_fd);
                     addr_pairs[1].local_fd = -1;
                 }
@@ -414,6 +416,7 @@ void IceService::handleIceCommand(const IceCommand &command, Connection* sender)
 				}
 				g_app.forwardService()->startForward(is.id, MEDIA_VIDEO, addr_pairs[2], webrtcAddr);
                 if(addr_pairs[3].local_fd > 0){
+                    LOG_INFO("session[" << command.sessionId << "] close local addr " << addr_pairs[3].local_ip << ":"  << addr_pairs[3].local_port);
                     close(addr_pairs[3].local_fd);
                     addr_pairs[3].local_fd = -1;
                 }

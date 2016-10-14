@@ -1112,13 +1112,26 @@ void confice_free(confice_t obj){
     for(int i = 0; i < obj->channelCount; i++){
         confchannel * ch = &obj->channels[i];
         
+
+        pj_sock_t fd = ch->sock_fd;
+        int closed = 0;
+        
         if (ch->active_sock != NULL) {
             ch->sock_fd = PJ_INVALID_SOCKET;
             pj_activesock_close(ch->active_sock);
+            closed = 1;
         } else if (ch->sock_fd && ch->sock_fd != PJ_INVALID_SOCKET) {
             pj_sock_close(ch->sock_fd);
             ch->sock_fd = PJ_INVALID_SOCKET;
+            closed = 2;
         }
+        
+        if(ch->bound_addr.addr.sa_family==pj_AF_INET()){ 
+            dbgi("confice chId[%d] (ipv4) close local port %d, closed=%d, fd=%d", ch->channelId, ntohs(ch->bound_addr.ipv4.sin_port),  closed, fd);
+        }else{
+            dbgi("confice chId[%d] (ipv6) close local port %d, closed=%d, fd=%d", ch->channelId, ntohs(ch->bound_addr.ipv6.sin6_port), closed, fd);
+        }
+        
     }
     
     if(obj->channels){
@@ -1325,6 +1338,11 @@ int confice_new(Json_em::Value& config
 				dbge("get socket sock name fail, channelId %d!!!", ch->channelId);
 				break;
 			}
+            if(ch->bound_addr.addr.sa_family==pj_AF_INET()){
+                dbgi("confice chId[%d] (ipv4) bind local port %d", ch->channelId, ntohs(ch->bound_addr.ipv4.sin_port) );
+            }else{
+                dbgi("confice chId[%d] (ipv6) bind local port %d", ch->channelId, ntohs(ch->bound_addr.ipv6.sin6_port) );
+            }
 
 
 			pj_activesock_cfg activesock_cfg;
@@ -1453,8 +1471,16 @@ int confice_steal_fds(confice_t obj, pj_sock_t fds[], int * pnum) {
     for(int i = 0; i < obj->channelCount; i++){
     	confchannel * ch = &obj->channels[i];
     	if (ch->active_sock != NULL) {
-    		fds[num] = pj_activesock_steal_fd(ch->active_sock);
+            pj_sock_t fd = pj_activesock_steal_fd(ch->active_sock);
+            fds[num] = fd;
     		num++;
+            
+            if(ch->bound_addr.addr.sa_family==pj_AF_INET()){
+                dbgi("confice chId[%d] (ipv4) steal local port %d, fd=%d", ch->channelId, ntohs(ch->bound_addr.ipv4.sin_port),   fd);
+            }else{
+                dbgi("confice chId[%d] (ipv6) steal local port %d, fd=%d", ch->channelId, ntohs(ch->bound_addr.ipv6.sin6_port),  fd);
+            }
+            
     	}
     }
     *pnum = num;

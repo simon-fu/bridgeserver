@@ -195,6 +195,98 @@ static void SignalHandle(int sig){
 // 	*p = 0;
 // }
 
+//#include "eice.h"
+//static
+//void test_eice_(){
+//    const char * caller_config_json = "{"
+//    "\"compCount\":4,"
+////    "\"turnAddrs\":[],"
+////    "\"turnAddrs\":[{\"host\":\"121.41.87.159\",\"port\":3478}]," //turn2
+//
+//        	"\"relayMS\":{"
+//            	"\"caller\":{"
+//        			"\"conferenceId\" : \"video2p-6ed76c6c-6115-42de-8777-fddd200ba6aa\","
+//        			"\"serverIp\" : \"121.41.87.159\","
+//        			"\"rcode\" : \"1449664953\","
+//        			"\"serverPort\" : 5000,"
+//        			"\"channelId\" : 1,"
+//            		"\"vchannelId\" : 2"
+//            	"},"
+//    
+//        		"\"callee\":{"
+//        			"\"conferenceId\" : \"video2p-6ed76c6c-6115-42de-8777-fddd200ba6aa\","
+//        			"\"serverIp\" : \"121.41.87.159\","
+//        			"\"rcode\" : \"1013325739\","
+//        			"\"serverPort\" : 5000,"
+//        			"\"channelId\" : 3,"
+//            		"\"vchannelId\" : 4"
+//        		"}"
+//        	"}"
+//    
+//    "}";
+//    
+//    const char * callee_config_json = "{"
+//    "\"compCount\":4"
+//    ",\"turnAddrs\":["
+//    "{\"host\":\"121.41.87.159\",\"port\":3478}" // turn2
+//    "]"
+//    "}";
+//#define CONTENT_SIZE (4*1024)
+//    static char caller_content[CONTENT_SIZE];
+//    int caller_content_len = CONTENT_SIZE;
+//    eice_t caller = 0;
+//    static char callee_content[CONTENT_SIZE];
+//    int callee_content_len = CONTENT_SIZE;
+//    eice_t callee = 0;
+//    
+//    sprintf(callee_content, "%s",
+//    
+//    "{"
+//    "\"ufrag\": \"75a0b8af\",\"forceRelay\": 1,\"pwd\": \"5a81bc44\",\"turnAddrs\": [],"
+//    "\"candidates\": [ "
+//    "{\"generation\": \"0\",\"component\": 1,\"protocol\": \"udp\",\"port\": 48081,\"ip\": \"172.17.3.161\",\"foundation\": \"Hac1103a1\",\"id\": 0,\"priority\": 2130706431,\"type\": \"host\",\"network\": \"1\"},"
+//    "{\"generation\": \"0\",\"component\": 2,\"protocol\": \"udp\",\"port\": 59046,\"ip\": \"172.17.3.161\",\"foundation\": \"Hac1103a1\",\"id\": 0,\"priority\": 2130706430,\"type\": \"host\",\"network\": \"1\"},"
+//    "{\"generation\": \"0\",\"component\": 3,\"protocol\": \"udp\",\"port\": 60694,\"ip\": \"172.17.3.161\",\"foundation\": \"Hac1103a1\",\"id\": 0,\"priority\": 2130706429,\"type\": \"host\",\"network\": \"1\"},"
+//    "{\"generation\": \"0\",\"component\": 4,\"protocol\": \"udp\",\"port\": 55374,\"ip\": \"172.17.3.161\",\"foundation\": \"Hac1103a1\",\"id\": 0,\"priority\": 2130706428,\"type\": \"host\",\"network\": \"1\"}"
+//    "],"
+//    
+//    
+//    "\"relayMS\":{"
+//    "\"caller\":{"
+//    "\"conferenceId\" : \"video2p-6ed76c6c-6115-42de-8777-fddd200ba6aa\","
+//    "\"serverIp\" : \"121.41.87.159\","
+//    "\"rcode\" : \"1449664953\","
+//    "\"serverPort\" : 5000,"
+//    "\"channelId\" : 1,"
+//    "\"vchannelId\" : 2"
+//    "},"
+//    
+//    "\"callee\":{"
+//    "\"conferenceId\" : \"video2p-6ed76c6c-6115-42de-8777-fddd200ba6aa\","
+//    "\"serverIp\" : \"121.41.87.159\","
+//    "\"rcode\" : \"1013325739\","
+//    "\"serverPort\" : 5000,"
+//    "\"channelId\" : 3,"
+//    "\"vchannelId\" : 4"
+//    "}"
+//    "}"
+//    
+//            "}" );
+//    
+//    callee_content_len = strlen(callee_content);
+//    printf("%s\n", callee_content);
+//    eice_new_caller(caller_config_json, caller_content, &caller_content_len, &caller);
+////    eice_new_callee(callee_config_json, caller_content, caller_content_len, callee_content, &callee_content_len, &callee);
+//    eice_caller_nego(caller, callee_content, callee_content_len, NULL, NULL);
+//
+//    getchar();
+//    eice_get_nego_result(caller, callee_content, &callee_content_len);
+//    update_steal_sockets(caller);
+//    eice_free(caller);
+////    eice_free(callee);
+//}
+
+
 AppServer g_app;
 
 int main(int argc, char *argv[])
@@ -204,6 +296,7 @@ int main(int argc, char *argv[])
     signal(SIGABRT, SignalHandle);
     printf("APP_VER = %s\n", APP_VER_STR);
     LOG_INFO("APP_VER = " << APP_VER_STR);
+//    test_eice_();
 //    crash_me();
 //    assert(0);
     
