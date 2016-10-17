@@ -281,7 +281,7 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 			}
 			
 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->xmppAddr, addrLen);
-			LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to xmpp, port: " << ntohs(forward->xmppAddr.sin_port));
+			LOG_TRACE("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to xmpp, port: " << ntohs(forward->xmppAddr.sin_port));
             forward->toV1Packets += 1;
             forward->toV1Bytes += dataLen;
 		}
@@ -322,7 +322,7 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 			}
             
 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->webrtcAddr, addrLen);
-			LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
+			LOG_TRACE("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
             forward->toWebrtcPackets += 1;
             forward->toWebrtcBytes += dataLen;
 
@@ -342,7 +342,7 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 			// 		while ((len = xrtp_h264_repacker_next(&forward->video_repacker_, (unsigned char *)forward->buffer)) > 0) {
 			// 			dataLen = len;
 			// 			sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->webrtcAddr, addrLen);
-			// 			LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
+			// 			LOG_TRACE("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
 			// 		}
 			// 	}
 
@@ -355,7 +355,7 @@ void ForwardService::udpCallback(evutil_socket_t fd, short what, void *arg)
 
 			// 	xrtp_transformer_process(&forward->audio_transformer_, (unsigned char *)forward->buffer);
 			// 	sendto(fd, forward->buffer, dataLen, 0, (struct sockaddr*)&forward->webrtcAddr, addrLen);
-			// 	LOG_DEBUG("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
+			// 	LOG_TRACE("send data len: " << dataLen << "; from addr: " << toHexString((const char*)&tempadd, addrLen) << " to webtrc, port: " << ntohs(forward->webrtcAddr.sin_port));
 			// }
 
 			

@@ -64,7 +64,7 @@ public:
 			*ps = htonl(ntohl(*ps)/(-sample_ratio));
 			//curRtpHeader->setTimeStamp(curRtpHeader->timeStamp() / (-sample_ratio));
 
-		LOG_DEBUG("ratio " << sample_ratio << "; timestamp change from " << oldTs << "; to (" << ntohl(*ps) << ")" << toHexString(&data[4], 4));
+//		LOG_TRACE("ratio " << sample_ratio << "; timestamp change from " << oldTs << "; to (" << ntohl(*ps) << ")" << toHexString(&data[4], 4));
 
 		return true;
 	}
