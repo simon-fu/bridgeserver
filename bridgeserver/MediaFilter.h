@@ -142,7 +142,7 @@ public:
 		}
         
         uint16_t storeSeq = be_get_u16(&rtpData[2]);
-		LOG_DEBUG("[resend] cache data with seq: " << storeSeq);
+//		LOG_DEBUG("[resend] cache data with seq: " << storeSeq);
         uint8_t * buf = rtpPackets_[storeSeq % MAX_CACHE_RTP_PKT_COUNT];
         be_set_u32(dataLen, &buf[0]);
         memcpy(&buf[4], rtpData, dataLen);
@@ -159,8 +159,8 @@ public:
 //		uint16_t startSeq = ntohs(*((uint16_t *)&(rtpData[1])));
 //		uint16_t endSeq = ntohs(*((uint16_t *)&(rtpData[3])));
         
-        uint16_t startSeq =  be_get_u16(&rtpData[1]);
-        uint16_t endSeq = be_get_u16(&rtpData[3]);
+        uint32_t startSeq =  be_get_u16(&rtpData[1]);
+        uint32_t endSeq = be_get_u16(&rtpData[3]);
         
         
         if (startSeq > endSeq) {
@@ -170,14 +170,15 @@ public:
 
 		LOG_DEBUG("Receive video [resend] require with start seqNo: " << startSeq << ", end seqNo: " << endSeq);
 
-
-		for (uint16_t seq = startSeq; seq <= endSeq; seq++)
+        // 65535 may cause side effect error
+        // use uint32_t instead of uint16_t
+		for (uint32_t seq = startSeq; seq <= endSeq; seq++)
 		{
             uint8_t * buf = rtpPackets_[seq % MAX_CACHE_RTP_PKT_COUNT];
             uint32_t rtpLen = be_get_u32(&buf[0]);
             uint8_t * rtpPkt = buf+4;
             
-            uint16_t storeSeq = be_get_u16(&rtpPkt[2]);
+            uint32_t storeSeq = be_get_u16(&rtpPkt[2]);
             if(rtpLen >= 12 && storeSeq == seq){
                 LOG_DEBUG("[resend] video rtp packet seq: " << seq);
                 send_(rtpPkt, rtpLen);
