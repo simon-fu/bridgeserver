@@ -110,7 +110,7 @@ MY_LD_FLAGS += -lm
 # MY_LD_FLAGS += -lboost_system
 # MY_LD_FLAGS += -lhiredis
 MY_LD_FLAGS += -lpthread
-MY_LD_FLAGS += -lcrypto
+# MY_LD_FLAGS += -lcrypto
 
 MY_LD_FLAGS += -leice-full
 MY_LD_FLAGS += -llog4cplus -lcppunit 

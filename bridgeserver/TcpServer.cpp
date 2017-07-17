@@ -64,8 +64,8 @@ void TcpServer::closeConnection(Connection* conn)
 	LOG_INFO("rpc disconnected from " << ip << ":" << port);
 
 
+    Connection * conn1 = *it;
 	connections_.erase(it);
-	Connection * conn1 = *it;
 	delete conn1;
 }
 
@@ -86,5 +86,6 @@ void TcpServer::acceptCallback(struct evconnlistener *listener, evutil_socket_t 
 		LOG_WARN("No enough memory to new a connection.");
 		return;
 	}
+    conn->setServer(self);
 	self->connections_.insert(conn);
 }
