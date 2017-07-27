@@ -47,6 +47,7 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 	unsigned usedLen = 0;
 	recvBuffer_.append(pDataBuffer, dataLen);
 	IceCommand response;
+    int nn = 0;
 	while ((dataLen > (int)totalUsedLen))
 	{
 		if (!parseCommand(response, recvBuffer_.data() + totalUsedLen, recvBuffer_.size() - totalUsedLen, usedLen))
@@ -63,7 +64,13 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
                  << ", usedLen=" << usedLen
                  << ", recvBuffer_.size()=" << recvBuffer_.size()
                  );
+        nn++;
+        if(nn >= 10000){
+            LOG_ERROR("somthing wrong in IceConnection::handleCommand, nn=" << nn);
+            exit(99);
+        }
 	}
+    
 	assert(totalUsedLen <= recvBuffer_.size());
 
 	// remove used data

@@ -36,9 +36,15 @@ void Connection::readCallback(struct bufferevent *bev, void *data)
 
 	char msg[4096];
 	size_t len;
+    int nn = 0;
 	while ((len = bufferevent_read(bev, msg, sizeof(msg) - 1)) > 0)
 	{
 		self->handleCommand(msg, len);
+        nn++;
+        if(nn >= 10000){
+            LOG_ERROR("somthing wrong in Connection::readCallback, nn=" << nn);
+            exit(199);
+        }
 	}
 }
 
