@@ -55,7 +55,14 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 		}		
 		totalUsedLen += usedLen;
 
+        LOG_INFO("=> handleIceCommand " << response.op);
 		handleIceCommand(response);
+        LOG_INFO("<= handleIceCommand " << response.op
+                 << ", dataLen=" << dataLen
+                 << ", totalUsedLen=" << totalUsedLen
+                 << ", usedLen=" << usedLen
+                 << ", recvBuffer_.size()=" << recvBuffer_.size()
+                 );
 	}
 	assert(totalUsedLen <= recvBuffer_.size());
 

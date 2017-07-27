@@ -386,7 +386,7 @@ ForwardService::Forward::~Forward() {
     LOG_INFO("toV1    : sid=" << this->sessionId << ", m=" << media << ", pkts=" << this->toV1Packets     << ", bytes=" << this->toV1Bytes);
     
 	if (iceInfo.local_fd > 0){
-        LOG_INFO("session[" << this->sessionId << "] close local addr " << iceInfo.local_ip << ":" << iceInfo.local_port);
+        LOG_INFO("forward session[" << this->sessionId << "] close local addr " << iceInfo.local_ip << ":" << iceInfo.local_port);
 		evutil_closesocket(iceInfo.local_fd);
         iceInfo.local_fd = -1;
 	}
