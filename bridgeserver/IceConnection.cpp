@@ -40,7 +40,7 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 {
 	assert(pDataBuffer != NULL && dataLen > 0);
 
-	LOG_DEBUG("Received data " << dataLen << "; current buffer " << recvBuffer_.size());	
+	LOG_INFO("Received data " << dataLen << "; current buffer " << recvBuffer_.size());
 	LOG_DEBUG("Received data: " << toHexString(pDataBuffer, std::min(16, dataLen + ICE_COMMAND_HEADER_LEN), " "));
 
 	unsigned totalUsedLen = 0;
@@ -67,7 +67,7 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 	assert(totalUsedLen <= recvBuffer_.size());
 
 	// remove used data
-	LOG_DEBUG("buffer len: " << recvBuffer_.size() << "; used " << totalUsedLen);
+	LOG_INFO("buffer len: " << recvBuffer_.size() << "; used " << totalUsedLen);
 	if (totalUsedLen == recvBuffer_.size())
 	{
 		recvBuffer_.clear();
@@ -76,7 +76,7 @@ void IceConnection::handleCommand(const char *pDataBuffer, int dataLen)
 	{
 		recvBuffer_.erase(0, totalUsedLen);
 	}
-	LOG_DEBUG("current buffer len " << recvBuffer_.size());
+	LOG_INFO("current buffer len " << recvBuffer_.size());
 }
 
 bool IceConnection::parseCommand(IceCommand &response, const char *pDataBuffer, unsigned nLength, unsigned & usedLen)
